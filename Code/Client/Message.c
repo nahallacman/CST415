@@ -26,7 +26,7 @@ Message::Message(
 	char ScenarioNum)
 {
 	m_FieldSeparator = '|';
-	m_TCPHeader[0] = TCPHeader[0];
+	m_TCPHeader[0] = (unsigned char)TCPHeader[0];
 	m_TCPHeader[1] = (unsigned char)TCPHeader[1];
 	strcpy(m_MessageType, MessageType);
 	strcpy(m_msTimeStamp, msTimeStamp);
@@ -382,7 +382,7 @@ void Message::formRequestMessage()
 	m_completeMessage[72] = m_FieldSeparator;
 
 	//ClientIPAddress 15 bytes left justified
-	char ClientIP[16] = "10.0.3.200     ";
+	char ClientIP[16] = "10.1.20.29     ";
 
 	for(int i = 0; i < strlen(ClientIP) ; i++)
 	{
@@ -412,11 +412,12 @@ void Message::formRequestMessage()
 	m_completeMessage[100] = m_FieldSeparator;
 
 	//ForeignHostIPAddress 15 bytes left justified
-	char HostIP[16] = "192.168.101.222";
+	char HostIP[16] = "192.168.101.220";
 
 	for(int i = 0; i < 15; i++)
 	{
-		m_completeMessage[101+i] = m_ForeignHostIPAddress[i];
+		//m_completeMessage[101+i] = m_ForeignHostIPAddress[i];
+		m_completeMessage[101+i] = HostIP[i];
 	}
 	
 	m_completeMessage[116] = m_FieldSeparator;
