@@ -7,16 +7,24 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <fstream>
 
 using std::cout;
 using std::endl;
 using std::string;
+using std::ofstream;
 
 class Message {
 
 public:
+
+void msgError(const char *msg);
+
 Message();
+Message(ofstream* logFile);
 Message(
+	//char* logFile,
+	ofstream* logFile,
 	unsigned char* TCPHeader, 
 	char* MessageType, 
 	char* msTimeStamp, 
@@ -48,10 +56,16 @@ void justifyRightZeroFillLeft(char * cString, int length);
 
 void formRequestMessage();
 
+void buildFromReturnString(char * returnString);
+
+void writeToLogFile();
+void writeRecordTrailerToLog();
+
 private:
 
 char m_FieldSeparator;
 
+char m_logFileName[1024];
 char m_TCPHeader [2];
 char m_MessageType [3];
 char m_msTimeStamp [10];
@@ -70,6 +84,9 @@ char m_ScenarioNum; //use as binary
 char m_completeMessage[146];
 
 char m_timeString[11];
+
+ofstream* m_logFile;
+
 };
 
 #endif

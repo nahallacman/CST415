@@ -1,5 +1,12 @@
 #include "Message.h"
 
+void Message::msgError(const char *msg)
+{
+	//FOR DEBUGGING, TAKE THE EXIT PARTS OUT SO I CAN RETURN AND SEE WHAT WENT WRONG!!
+    //perror(msg);
+    //exit(0);
+}
+
 Message::Message()
 {
 	m_FieldSeparator = '|';
@@ -9,7 +16,19 @@ Message::Message()
 
 }
 
+Message::Message(ofstream* logFile)
+{
+	m_FieldSeparator = '|';
+
+	m_TCPHeader[0] = 0; 
+	m_TCPHeader[1] = 0; 
+
+	m_logFile = logFile;
+}
+
 Message::Message(
+	//char* logFileName,
+	ofstream* logFile,
 	unsigned char* TCPHeader, 
 	char* MessageType, 
 	char* msTimeStamp, 
@@ -26,6 +45,7 @@ Message::Message(
 	char ScenarioNum)
 {
 	m_FieldSeparator = '|';
+	//strcpy(m_logFileName, logFileName);
 	m_TCPHeader[0] = (unsigned char)TCPHeader[0];
 	m_TCPHeader[1] = (unsigned char)TCPHeader[1];
 	strcpy(m_MessageType, MessageType);
@@ -41,6 +61,9 @@ Message::Message(
 	strcpy(m_ForeignHostServicePort, ForeignHostServicePort);
 	strcpy(m_StudentData, StudentData);
 	m_ScenarioNum = ScenarioNum;
+
+	//m_logFile.open (logFileName);
+	m_logFile = logFile;
 }
 
 
@@ -450,3 +473,232 @@ void Message::formRequestMessage()
 	m_completeMessage[146] = 0;
 
 };
+
+void Message::buildFromReturnString(char * returnString)
+{
+	int curTime = 0;
+	char Byte;
+	int index = 2;
+	char errorMessage[100];
+
+	//2 bytes in Big Endian Order
+	m_TCPHeader[0] = returnString[0]; //double check that this is Big Endian byte Order
+	m_TCPHeader[1] = returnString[1]; // 144 bytes long (not including these two bytes)
+
+	//MessageType fixed as "REQ"
+	//TODO: Make sure this actually says "REQ" first
+	for(int i = 0; i < 3; i++, index++)
+	{	
+		m_MessageType[i] = returnString[index];
+	}
+
+	//m_completeMessage[5] = m_FieldSeparator;
+	if(returnString[index] != '|')
+	{
+		msgError("Missing '|' at position 5 (0 index).");
+	}
+	index++;
+
+	//msTimeStamp 10 bytes right justified (probably collected by time)
+	for(int i = 0; i < 10 & returnString[index] != 0 & returnString[index] != '|' ; i++, index++)
+	{	
+		m_msTimeStamp[i] = returnString[index];
+	}
+
+	//m_completeMessage[16] = m_FieldSeparator;
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//RequestID 20 bytes Alphanumeric
+	for(int i = 0; i < 20 & returnString[index] != 0 & returnString[index] != '|' ; i++, index++)
+	{	
+		m_RequestID[i] = returnString[index];
+	}
+
+	//m_completeMessage[37] = m_FieldSeparator;
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//StudentName 20 bytes Alphanumeric
+	char name[21] = "BarkmanC            ";
+
+	for(int i = 0; i < 20 & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	{
+		m_StudentName[i] = returnString[index];
+	}
+	
+	//m_completeMessage[58] = m_FieldSeparator;
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//StudentID 7 bytes "dd-dddd" format
+	char id[8] = "17-7918";
+
+	for(int i = 0; i < 7  & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	{
+		m_StudentID[i]  = returnString[index];
+	}
+	
+	//m_completeMessage[66] = m_FieldSeparator;
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//ResponseDelay 5 bytes right justified
+	char delay[6] = "01000";
+
+	for(int i = 0; i < 5  & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	{
+		m_ResponseDelay[i] = returnString[index];
+	}
+	
+	//m_completeMessage[72] = m_FieldSeparator;
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//ClientIPAddress 15 bytes left justified
+	char ClientIP[16] = "10.1.20.29     ";
+
+	for(int i = 0; i < strlen(ClientIP) & returnString[index] != 0 & returnString[index] != '|' ; i++, index++)
+	{
+		m_ClientIPAddress[i] = returnString[index];
+	}
+	
+	//m_completeMessage[88] = m_FieldSeparator;
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//ClientServicePort 5 bytes right justified
+	char ClientPort[6] = "12345";
+
+	for(int i = 0; i < 5  & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	{
+		m_ClientServicePort[i] = returnString[index];
+	}
+	
+	//m_completeMessage[94] = m_FieldSeparator;
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//ClientSocketNo. 5 bytes right justified
+	char ClientSocket[6] = "54321";
+
+	for(int i = 0; i < 5  & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	{
+		m_ClientSocketNum[i] = returnString[index];
+	}
+	
+	//m_completeMessage[100] = m_FieldSeparator;
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//ForeignHostIPAddress 15 bytes left justified
+	char HostIP[16] = "192.168.101.220";
+
+	for(int i = 0; i < 15  & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	{
+		//m_completeMessage[101+i] = m_ForeignHostIPAddress[i];
+		HostIP[i] = returnString[index];
+	}
+	
+	//m_completeMessage[116] = m_FieldSeparator;
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//ForeignHostServicePort 5 bytes right justified
+	char HostPort[6] = "12345";
+
+	for(int i = 0; i < 5 & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	{
+		m_ForeignHostServicePort[i] = returnString[index];
+	}
+	
+	//m_completeMessage[122] = m_FieldSeparator;	
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//StudentData 20 bytes Basically Junk Data
+	char StudentData[21] = "ABCDEFGHIJKLMNOPQRST";
+
+	for(int i = 0; i < 20  & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	{
+		m_StudentData[i] = returnString[index];
+	}
+	
+	//m_completeMessage[143] = m_FieldSeparator;
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//ScenarioNo. 1 byte Numeric
+	m_ScenarioNum = returnString[index];
+	index++;
+
+	//m_completeMessage[145] = m_FieldSeparator;
+
+	if(returnString[index] != '|')
+	{
+		sprintf(errorMessage, "Missing FINAL '|' at position %d? (0 index).", index);
+		msgError(errorMessage);
+	}
+	index++;
+
+	//m_completeMessage[146] = 0;
+
+
+}
+
+void Message::writeToLogFile()
+{
+	formRequestMessage(); //just in case
+	//TODO: fix this so it actually prints out the correct message
+	*m_logFile << getRequestMessage() << endl;
+}
+
+void Message::writeRecordTrailerToLog()
+{
+	//TODO: Actually print the log trailer
+	*m_logFile << "TODO: Make Record Trailer" << endl;
+}
