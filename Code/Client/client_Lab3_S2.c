@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
 
 	ofstream logFile;
-	logFile.open("Lab3_Scenario2.log"); //make sure to open the log before using it!
+	logFile.open("Lab3.Scenario2.BarkmanC.txt"); //make sure to open the log before using it!
 
 	int local_port;
 	sockaddr_in sin;
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 
 							//TODO: remove debug printing
 							fwrite(returnMessage.getRequestMessage(), sizeof(char), (returnMessage.getRequestMessage()[1] < 255) ? returnMessage.getRequestMessage()[1] : 255 , stdout); //a bit sketchy but at least it has a max size check. If the target size is less than 255 there could be issues.
-		cout << endl;
+							cout << endl;
 
 							recieveCount++;
 							cout << "Recieved response #" << recieveCount << "." << endl;
@@ -249,13 +249,15 @@ int main(int argc, char *argv[])
 		//std::this_thread::sleep_for(std::chrono::milliseconds(x));
 	}
 
+	int recieveShutdownStatus, sendShutdownStatus, closeStatus = 0;
 
+	recieveShutdownStatus = shutdown(sockfd, 0); 
+	sendShutdownStatus = shutdown(sockfd, 1); 
 
-
-    close(sockfd);
+	closeStatus = close(sockfd);
 
 	// --- clean up everything, finish log ---
-	realMessage.writeRecordTrailerToLog();
+	realMessage.writeRecordTrailerToLog(recieveShutdownStatus, sendShutdownStatus, closeStatus);
 	logFile.close();
 
     return 0;

@@ -58,7 +58,7 @@ int formRequestMessage();
 void buildFromReturnString(char * returnString, int ResponseType);
 
 void writeToLogFile();
-void writeRecordTrailerToLog();
+void writeRecordTrailerToLog(int RcvShutdownStatus, int XmtShutdownStatus, int CloseStatus);
 
 void setResponseDelay(char * ResponseDelayString);
 

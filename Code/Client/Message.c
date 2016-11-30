@@ -781,10 +781,58 @@ void Message::writeToLogFile()
 	m_logFile->write("\n", sizeof(char));
 }
 
-void Message::writeRecordTrailerToLog()
+void Message::writeRecordTrailerToLog(int RcvShutdownStatus, int XmtShutdownStatus, int CloseStatus)
 {
+	char localString[9];
 	//TODO: Actually print the log trailer
-	*m_logFile << "TODO: Make Record Trailer" << endl;
+	//*m_logFile << "TODO: Make Record Trailer" << endl;
+
+
+	time_t rawtime;
+	struct tm * timeinfo;
+	//char buffer [80];
+
+	time (&rawtime);
+	timeinfo = localtime (&rawtime);
+
+
+	//DATE - MMDDYYYY
+
+	strftime (localString,9,"%m%d%Y",timeinfo);
+
+	*m_logFile << localString << '|';
+
+	//TIME HHMMSS
+
+	strftime (localString,7,"%H%M%S",timeinfo);
+
+	*m_logFile << localString << '|';
+
+	//RcvShutdownStatus - 5 char
+
+	snprintf(localString, 5, "%d", RcvShutdownStatus); //portable, and protected from buffer overflows
+	
+	justifyRightZeroFillLeft(localString, 5);
+
+	*m_logFile << localString << '|';
+
+	// XmtShutdownStatus - 5 char
+
+	snprintf(localString, 5, "%d", XmtShutdownStatus); //portable, and protected from buffer overflows
+	
+	justifyRightZeroFillLeft(localString, 5);
+
+	*m_logFile << localString << '|';
+
+	// CloseStatus - 5 char
+
+	snprintf(localString, 5, "%d", CloseStatus); //portable, and protected from buffer overflows
+	
+	justifyRightZeroFillLeft(localString, 5);
+
+	*m_logFile << localString;
+
+	//END
 }
 
 void Message::setResponseDelay(char * ResponseDelayString)
