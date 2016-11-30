@@ -335,10 +335,11 @@ void Message::justifyRightZeroFillLeft(char * cString, int length)
 
 }
 
-void Message::formRequestMessage()
+int Message::formRequestMessage()
 {
 	int curTime = 0;
 	char Byte;
+	int index = 0;
 
 	//zero out the entire message just in case
 	for(int i = 0; i < 146; i++)
@@ -347,130 +348,150 @@ void Message::formRequestMessage()
 	}
 
 	//2 bytes in Big Endian Order
-	m_completeMessage[0] = m_TCPHeader[0]; //double check that this is Big Endian byte Order
-	m_completeMessage[1] = m_TCPHeader[1]; // 144 bytes long (not including these two bytes)
+	m_completeMessage[index] = m_TCPHeader[0]; //double check that this is Big Endian byte Order
+	index++;
+	m_completeMessage[index] = m_TCPHeader[1]; // 144 bytes long (not including these two bytes)
+	index++;
 
 	//MessageType fixed as "REQ"
-	for(int i = 0; i < 3; i++)
+	for(int i = 0; i < 3; i++, index++)
 	{	
-		m_completeMessage[2+i] = m_MessageType[i];
+		m_completeMessage[index] = m_MessageType[i];
 	}
 
-	m_completeMessage[5] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//msTimeStamp 10 bytes right justified (probably collected by time)
-	for(int i = 0; i < 10; i++)
+	for(int i = 0; i < 10; i++, index++)
 	{	
-		m_completeMessage[6+i] = m_msTimeStamp[i];
+		m_completeMessage[index] = m_msTimeStamp[i];
 	}
 
-	m_completeMessage[16] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//RequestID 20 bytes Alphanumeric
-	for(int i = 0; i < 20; i++)
+	for(int i = 0; i < 20; i++, index++)
 	{	
-		m_completeMessage[17+i] = m_RequestID[i];
+		m_completeMessage[index] = m_RequestID[i];
 	}
 
-	m_completeMessage[37] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//StudentName 20 bytes Alphanumeric
-	char name[21] = "BarkmanC            ";
+	//char name[21] = "BarkmanC            ";
 
-	for(int i = 0; i < 20; i++)
+	for(int i = 0; i < 20; i++, index++)
 	{
-		m_completeMessage[38+i] = m_StudentName[i];
+		m_completeMessage[index] = m_StudentName[i];
 	}
 	
-	m_completeMessage[58] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//StudentID 7 bytes "dd-dddd" format
-	char id[8] = "17-7918";
+	//char id[8] = "17-7918";
 
-	for(int i = 0; i < 7; i++)
+	for(int i = 0; i < 7; i++, index++)
 	{
-		m_completeMessage[59+i] = m_StudentID[i];
+		m_completeMessage[index] = m_StudentID[i];
 	}
 	
-	m_completeMessage[66] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//ResponseDelay 5 bytes right justified
-	char delay[6] = "01000";
+	//char delay[6] = "01000";
 
-	for(int i = 0; i < 5; i++)
+	for(int i = 0; i < 5; i++, index++)
 	{
-		m_completeMessage[67+i] = m_ResponseDelay[i];
+		m_completeMessage[index] = m_ResponseDelay[i];
 	}
 	
-	m_completeMessage[72] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//ClientIPAddress 15 bytes left justified
-	char ClientIP[16] = "10.1.20.29     ";
+	//char ClientIP[16] = "10.1.20.29     ";
 
-	for(int i = 0; i < strlen(ClientIP) ; i++)
+	/*strlen(ClientIP)*/ 
+	for(int i = 0; i < 15 & m_ClientIPAddress[i] != 0 & m_ClientIPAddress[i] != '|' ; i++, index++)
 	{
-		m_completeMessage[73+i] = m_ClientIPAddress[i];
+		m_completeMessage[index] = m_ClientIPAddress[i];
 	}
 	
-	m_completeMessage[88] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//ClientServicePort 5 bytes right justified
-	char ClientPort[6] = "12345";
+	//char ClientPort[6] = "12345";
 
-	for(int i = 0; i < 5; i++)
+	for(int i = 0; i < 5; i++, index++)
 	{
-		m_completeMessage[89+i] = m_ClientServicePort[i];
+		m_completeMessage[index] = m_ClientServicePort[i];
 	}
 	
-	m_completeMessage[94] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//ClientSocketNo. 5 bytes right justified
-	char ClientSocket[6] = "54321";
+	//char ClientSocket[6] = "54321";
 
-	for(int i = 0; i < 5; i++)
+	for(int i = 0; i < 5; i++, index++)
 	{
-		m_completeMessage[95+i] = m_ClientSocketNum[i];
+		m_completeMessage[index] = m_ClientSocketNum[i];
 	}
 	
-	m_completeMessage[100] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//ForeignHostIPAddress 15 bytes left justified
 	char HostIP[16] = "192.168.101.220";
 
-	for(int i = 0; i < 15; i++)
-	{
+	for(int i = 0; i < 15; i++, index++)
+	{	
+		//TODO: Fix this!!!!
 		//m_completeMessage[101+i] = m_ForeignHostIPAddress[i];
-		m_completeMessage[101+i] = HostIP[i];
+		m_completeMessage[index] = HostIP[i];
 	}
 	
-	m_completeMessage[116] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//ForeignHostServicePort 5 bytes right justified
-	char HostPort[6] = "12345";
+	//char HostPort[6] = "12345";
 
-	for(int i = 0; i < 5; i++)
+	for(int i = 0; i < 5; i++, index++)
 	{
-		m_completeMessage[117+i] = m_ForeignHostServicePort[i];
+		m_completeMessage[index] = m_ForeignHostServicePort[i];
 	}
 	
-	m_completeMessage[122] = m_FieldSeparator;	
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//StudentData 20 bytes Basically Junk Data
-	char StudentData[21] = "ABCDEFGHIJKLMNOPQRST";
+	//char StudentData[21] = "ABCDEFGHIJKLMNOPQRST";
 
-	for(int i = 0; i < 20; i++)
+	for(int i = 0; i < 20; i++, index++)
 	{
-		m_completeMessage[123+i] = m_StudentData[i];
+		m_completeMessage[index] = m_StudentData[i];
 	}
 	
-	m_completeMessage[143] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
 	//ScenarioNo. 1 byte Numeric
-	m_completeMessage[144] = m_ScenarioNum;
+	m_completeMessage[index] = m_ScenarioNum;
+	index++;
 
-	m_completeMessage[145] = m_FieldSeparator;
+	m_completeMessage[index] = m_FieldSeparator;
+	index++;
 
-	m_completeMessage[146] = 0;
+	m_completeMessage[index] = 0;
+
+	return index;
 
 };
 
@@ -576,11 +597,19 @@ void Message::buildFromReturnString(char * returnString)
 	index++;
 
 	//ClientIPAddress 15 bytes left justified
-	char ClientIP[16] = "10.1.20.29     ";
+	//char ClientIP[16] = "10.1.20.29     ";
+	bool ClientIPLoopFlag = true;
+	int ClientIPMaxStringLength = 15;
+	//ClientIPStringLength = strlen(ClientIP);
 
-	for(int i = 0; i < strlen(ClientIP) & returnString[index] != 0 & returnString[index] != '|' ; i++, index++)
+	for(int i = 0; ClientIPLoopFlag == true; i++, index++) //TODO: bug here, index gets incremented one too many times
 	{
 		m_ClientIPAddress[i] = returnString[index];
+		if(i > ClientIPMaxStringLength | returnString[index] == 0 | returnString[index] == '|' )
+		{
+			ClientIPLoopFlag = false;
+			m_ClientIPAddress[i] = 0;
+		}
 	}
 	
 	//m_completeMessage[88] = m_FieldSeparator;
@@ -592,11 +621,20 @@ void Message::buildFromReturnString(char * returnString)
 	index++;
 
 	//ClientServicePort 5 bytes right justified
-	char ClientPort[6] = "12345";
+	//char ClientPort[6] = "12345";
+	bool ClientPortLoopFlag = true;
 
-	for(int i = 0; i < 5  & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
-	{
-		m_ClientServicePort[i] = returnString[index];
+	for(int i = 0; ClientPortLoopFlag == true; i++, index++)
+	{	
+		if(i < 5  & returnString[index] != 0 & returnString[index] != '|')
+		{
+			ClientPortLoopFlag = false;
+			m_ClientIPAddress[i] = 0;
+		}
+		else
+		{
+			m_ClientServicePort[i] = returnString[index];
+		}	
 	}
 	
 	//m_completeMessage[94] = m_FieldSeparator;
@@ -608,11 +646,20 @@ void Message::buildFromReturnString(char * returnString)
 	index++;
 
 	//ClientSocketNo. 5 bytes right justified
-	char ClientSocket[6] = "54321";
+	//char ClientSocket[6] = "54321";
+	bool ClientSocketLoopFlag = true;
 
-	for(int i = 0; i < 5  & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	for(int i = 0; ClientSocketLoopFlag == true ; i++, index++)
 	{
-		m_ClientSocketNum[i] = returnString[index];
+		if(i < 5  & returnString[index] != 0 & returnString[index] != '|')
+		{
+			ClientSocketLoopFlag = false;
+			m_ClientIPAddress[i] = 0;
+		}
+		else
+		{
+			m_ClientSocketNum[i] = returnString[index];
+		}
 	}
 	
 	//m_completeMessage[100] = m_FieldSeparator;
@@ -694,7 +741,9 @@ void Message::writeToLogFile()
 {
 	formRequestMessage(); //just in case
 	//TODO: fix this so it actually prints out the correct message
-	*m_logFile << getRequestMessage() << endl;
+	//*m_logFile << getRequestMessage() << endl;
+	m_logFile->write(getRequestMessage(), sizeof(char) * 146);
+	m_logFile->write("\n", sizeof(char));
 }
 
 void Message::writeRecordTrailerToLog()
@@ -702,3 +751,23 @@ void Message::writeRecordTrailerToLog()
 	//TODO: Actually print the log trailer
 	*m_logFile << "TODO: Make Record Trailer" << endl;
 }
+
+void Message::setResponseDelay(char * ResponseDelayString)
+{
+	for(int i=0; i < 4 | ResponseDelayString[i] == '|'; i++)
+	{
+		m_ResponseDelay[i] = ResponseDelayString[i];
+	}
+}
+
+void Message::setRequestId(int Id)
+{
+	char tempStr[20];
+
+	snprintf(tempStr, 20, "%d", Id); //portable, and protected from buffer overflows
+
+	justifyRightZeroFillLeft(tempStr, 20);
+
+	strncpy(m_RequestID, tempStr, 20);
+}
+

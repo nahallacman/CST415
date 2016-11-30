@@ -54,12 +54,16 @@ void setOutgoingPort(int portNum);
 void setSocketNum(int socketNum);
 void justifyRightZeroFillLeft(char * cString, int length);
 
-void formRequestMessage();
+int formRequestMessage();
 
 void buildFromReturnString(char * returnString);
 
 void writeToLogFile();
 void writeRecordTrailerToLog();
+
+void setResponseDelay(char * ResponseDelayString);
+
+void setRequestId(int Id);
 
 private:
 

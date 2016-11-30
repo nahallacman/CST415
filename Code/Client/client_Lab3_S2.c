@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
 
 	ofstream logFile;
-	logFile.open("Lab3_Scenario1.log"); //make sure to open the log before using it!
+	logFile.open("Lab3_Scenario2.log"); //make sure to open the log before using it!
 
 	int local_port;
 	sockaddr_in sin;
@@ -69,11 +69,14 @@ int main(int argc, char *argv[])
 			"ABCDEFGHIJKLMNOPQRST",
 			'1' );
 
-	int i; i = 0;
+	//int i; i = 0;
 	char message[256];
 	int outgoingPortNum;
 
+	int bytesRead;
+
     int sockfd, portno, n;
+	//int sockfd, portno;
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
@@ -136,10 +139,19 @@ int main(int argc, char *argv[])
 	{
 		if(sendCount < 100)
 		{
-	
-			printf("sending message iteration #: %d\n", sendCount);
+			printf("sending message iteration #: %d\n", sendCount+1);
+			if(sendCount == 25 | sendCount == 75)
+			{
+				realMessage.setResponseDelay("03000");
+			}
+			else
+			{
+				realMessage.setResponseDelay("00000");
+			}
 
 			realMessage.setMSTimeStamp(realMessage.getCurrentMSTimeString());
+
+			realMessage.setRequestId(sendCount+1);
 
 			realMessage.formRequestMessage();
 
@@ -156,63 +168,65 @@ int main(int argc, char *argv[])
 			sendCount++;
 		}
 	
-		if(recieveCount < 100)
+		if(recieveCount < 101)
 		{
 			//TODO: recieving only works on individual messages currently, needs to be able to read in multiple messages to the buffer on a single read.
 			// --- receive ---
-			n = read(sockfd,inBuffer,1024);
+			bytesRead = read(sockfd,inBuffer,1024);
 			//printf("After Read Debug Message");
-			if (n < 0)
+			if (bytesRead < 0)
 			{ 
 				//error("ERROR reading from socket");
 				cout << "Non-blocking read was empty." << endl;
 			}
+			else if(bytesRead > 1022) //7*146 = 1022
+			{
+				error("ERROR reading from socket, unballanced read performed.");
+			}
 			else
 			{
 				bool reading = true;
+				int endOfLastMessage = 0;
 				int readIndex = 0;
 				char tempBuf[146];
+				int numSeparators = 0;
 				//TODO: Interpret the read as separate messages
 				//13 '|' per message
 				while(reading)
 				{
-					int numSeparators = 0;
-
-					while(numSeparators < 13)
+					if(inBuffer[readIndex] == '|')
 					{
-						if(inBuffer[readIndex] == '|')
+						numSeparators++;
+						if(numSeparators > 11)
 						{
-							numSeparators++;
+							numSeparators = 0;
+							//finished with a message from endOfLastMessage to readIndex
+							for(int i = endOfLastMessage; i < readIndex; i++)
+							{
+								tempBuf[i - endOfLastMessage] = inBuffer[i];
+							}
+							endOfLastMessage = readIndex;
+
+							// --- Take buffer and convert into a Message
+							returnMessage.buildFromReturnString(tempBuf);
+
+							// --- write returned message to log
+							returnMessage.writeToLogFile();
+
+							recieveCount++;
+							cout << "Recieved response #" << recieveCount << "." << endl;
 						}
-						readIndex++;
 					}
-
-					//now, from inBuffer[0] to inBuffer[readIndex] is your first message
-					//strncpy(tempBuf, inBuffer, readIndex);
-					tempBuf[0] = inBuffer[0];
-					tempBuf[1] = inBuffer[1];
-					for(int i=1; i < readIndex & inBuffer[i] != 0; i++)
+					if(readIndex >= bytesRead)
 					{
-						tempBuf[i] = inBuffer[i];
+						reading = false; // we have reached the end of the file that has been read.
 					}
-					
-
-					if(inBuffer[count+1] == 0) //off by one issue could arise from this
-					{
-						reading = false;
-					}
+					readIndex++;
 				}
 
 				
 
-				recieveCount++;
-				cout << "Recieved response #" << recieveCount << "." << endl;
 
-				// --- Take buffer and convert into a Message
-				returnMessage.buildFromReturnString(tempBuf);
-
-				// --- write returned message to log
-				returnMessage.writeToLogFile();
 
 				// --- clear buffer just in case ----
 		    		bzero(inBuffer,1024);
@@ -220,7 +234,7 @@ int main(int argc, char *argv[])
 		}
 
 		//this could go just after recieveCount++ to save a few cycles if things are not threaded
-		if(recieveCount >= 99)
+		if(recieveCount >= 100)
 		{
 			doneSending = true;
 		}
