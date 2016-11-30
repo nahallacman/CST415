@@ -363,7 +363,7 @@ int Message::formRequestMessage()
 	index++;
 
 	//msTimeStamp 10 bytes right justified (probably collected by time)
-	for(int i = 0; i < 10; i++, index++)
+	for(int i = 0; i < 10 & m_ClientIPAddress[i] != 0 & m_ClientIPAddress[i] != '|'; i++, index++)
 	{	
 		m_completeMessage[index] = m_msTimeStamp[i];
 	}
@@ -372,7 +372,7 @@ int Message::formRequestMessage()
 	index++;
 
 	//RequestID 20 bytes Alphanumeric
-	for(int i = 0; i < 20; i++, index++)
+	for(int i = 0; i < 20 & m_ClientIPAddress[i] != 0 & m_ClientIPAddress[i] != '|'; i++, index++)
 	{	
 		m_completeMessage[index] = m_RequestID[i];
 	}
@@ -383,7 +383,7 @@ int Message::formRequestMessage()
 	//StudentName 20 bytes Alphanumeric
 	//char name[21] = "BarkmanC            ";
 
-	for(int i = 0; i < 20; i++, index++)
+	for(int i = 0; i < 20 & m_ClientIPAddress[i] != 0 & m_ClientIPAddress[i] != '|'; i++, index++)
 	{
 		m_completeMessage[index] = m_StudentName[i];
 	}
@@ -405,7 +405,7 @@ int Message::formRequestMessage()
 	//ResponseDelay 5 bytes right justified
 	//char delay[6] = "01000";
 
-	for(int i = 0; i < 5; i++, index++)
+	for(int i = 0; i < 5 & m_ResponseDelay[i] != 0 & m_ResponseDelay[i] != '|'; i++, index++)
 	{
 		m_completeMessage[index] = m_ResponseDelay[i];
 	}
@@ -428,7 +428,7 @@ int Message::formRequestMessage()
 	//ClientServicePort 5 bytes right justified
 	//char ClientPort[6] = "12345";
 
-	for(int i = 0; i < 5; i++, index++)
+	for(int i = 0; i < 5 & m_ClientServicePort[i] != 0 & m_ClientServicePort[i] != '|'; i++, index++)
 	{
 		m_completeMessage[index] = m_ClientServicePort[i];
 	}
@@ -439,7 +439,7 @@ int Message::formRequestMessage()
 	//ClientSocketNo. 5 bytes right justified
 	//char ClientSocket[6] = "54321";
 
-	for(int i = 0; i < 5; i++, index++)
+	for(int i = 0; i < 5 & m_ClientSocketNum[i] != 0 & m_ClientSocketNum[i] != '|'; i++, index++)
 	{
 		m_completeMessage[index] = m_ClientSocketNum[i];
 	}
@@ -450,7 +450,7 @@ int Message::formRequestMessage()
 	//ForeignHostIPAddress 15 bytes left justified
 	char HostIP[16] = "192.168.101.220";
 
-	for(int i = 0; i < 15; i++, index++)
+	for(int i = 0; i < 15 & HostIP[i] != 0 & HostIP[i] != '|'; i++, index++)
 	{	
 		//TODO: Fix this!!!!
 		//m_completeMessage[101+i] = m_ForeignHostIPAddress[i];
@@ -463,7 +463,7 @@ int Message::formRequestMessage()
 	//ForeignHostServicePort 5 bytes right justified
 	//char HostPort[6] = "12345";
 
-	for(int i = 0; i < 5; i++, index++)
+	for(int i = 0; i < 5 & m_ForeignHostServicePort[i] != 0 & m_ForeignHostServicePort[i] != '|'; i++, index++)
 	{
 		m_completeMessage[index] = m_ForeignHostServicePort[i];
 	}
@@ -474,7 +474,7 @@ int Message::formRequestMessage()
 	//StudentData 20 bytes Basically Junk Data
 	//char StudentData[21] = "ABCDEFGHIJKLMNOPQRST";
 
-	for(int i = 0; i < 20; i++, index++)
+	for(int i = 0; i < 20 & m_StudentData[i] != 0 & m_StudentData[i] != '|'; i++, index++)
 	{
 		m_completeMessage[index] = m_StudentData[i];
 	}
@@ -495,7 +495,7 @@ int Message::formRequestMessage()
 
 };
 
-void Message::buildFromReturnString(char * returnString)
+void Message::buildFromReturnString(char * returnString, int ResponseType)
 {
 	int curTime = 0;
 	char Byte;
@@ -605,10 +605,11 @@ void Message::buildFromReturnString(char * returnString)
 	for(int i = 0; ClientIPLoopFlag == true; i++, index++) //TODO: bug here, index gets incremented one too many times
 	{
 		m_ClientIPAddress[i] = returnString[index];
-		if(i > ClientIPMaxStringLength | returnString[index] == 0 | returnString[index] == '|' )
+		if(i > ClientIPMaxStringLength - 1 | returnString[index] == 0 | returnString[index] == '|' )
 		{
 			ClientIPLoopFlag = false;
 			m_ClientIPAddress[i] = 0;
+			index--;
 		}
 	}
 	
@@ -626,10 +627,11 @@ void Message::buildFromReturnString(char * returnString)
 
 	for(int i = 0; ClientPortLoopFlag == true; i++, index++)
 	{	
-		if(i < 5  & returnString[index] != 0 & returnString[index] != '|')
+		if(i > 5-1  | returnString[index] == 0 | returnString[index] == '|')
 		{
 			ClientPortLoopFlag = false;
-			m_ClientIPAddress[i] = 0;
+			m_ClientServicePort[i] = 0;
+			index--;
 		}
 		else
 		{
@@ -651,10 +653,11 @@ void Message::buildFromReturnString(char * returnString)
 
 	for(int i = 0; ClientSocketLoopFlag == true ; i++, index++)
 	{
-		if(i < 5  & returnString[index] != 0 & returnString[index] != '|')
+		if(i > 5-1 | returnString[index] == 0 | returnString[index] == '|')
 		{
 			ClientSocketLoopFlag = false;
-			m_ClientIPAddress[i] = 0;
+			m_ClientSocketNum[i] = 0;
+			index--;
 		}
 		else
 		{
@@ -671,12 +674,21 @@ void Message::buildFromReturnString(char * returnString)
 	index++;
 
 	//ForeignHostIPAddress 15 bytes left justified
-	char HostIP[16] = "192.168.101.220";
+	//char HostIP[16] = "192.168.101.220";
+	bool HostIPLoopFlag = true;
 
-	for(int i = 0; i < 15  & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	for(int i = 0; HostIPLoopFlag == true; i++, index++)
 	{
-		//m_completeMessage[101+i] = m_ForeignHostIPAddress[i];
-		HostIP[i] = returnString[index];
+		if(i > 15-1 | returnString[index] == 0 | returnString[index] == '|')
+		{
+			HostIPLoopFlag = false;
+			m_ForeignHostIPAddress[i] = 0;
+			index--;
+		}
+		else
+		{
+			m_ForeignHostIPAddress[i] = returnString[index];
+		}
 	}
 	
 	//m_completeMessage[116] = m_FieldSeparator;
@@ -688,11 +700,21 @@ void Message::buildFromReturnString(char * returnString)
 	index++;
 
 	//ForeignHostServicePort 5 bytes right justified
-	char HostPort[6] = "12345";
+	//char HostPort[6] = "12345";
+	bool HostPortLoopFlag = true;
 
-	for(int i = 0; i < 5 & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	for(int i = 0; HostPortLoopFlag == true ; i++, index++)
 	{
-		m_ForeignHostServicePort[i] = returnString[index];
+		if(i > 5-1 | returnString[index] == 0 | returnString[index] == '|')
+		{
+			HostPortLoopFlag = false;
+			m_ForeignHostServicePort[i] = 0;
+			index--;
+		}
+		else
+		{
+			m_ForeignHostServicePort[i] = returnString[index];
+		}	
 	}
 	
 	//m_completeMessage[122] = m_FieldSeparator;	
@@ -704,11 +726,22 @@ void Message::buildFromReturnString(char * returnString)
 	index++;
 
 	//StudentData 20 bytes Basically Junk Data
-	char StudentData[21] = "ABCDEFGHIJKLMNOPQRST";
+	//char StudentData[21] = "ABCDEFGHIJKLMNOPQRST";
+	bool StudentDataLoopFlag = true;	
 
-	for(int i = 0; i < 20  & returnString[index] != 0 & returnString[index] != '|'; i++, index++)
+	for(int i = 0; StudentDataLoopFlag == true ; i++, index++)
 	{
-		m_StudentData[i] = returnString[index];
+
+		if(i > 20-1 | returnString[index] == 0 | returnString[index] == '|')
+		{
+			StudentDataLoopFlag = false;
+			m_StudentData[i] = 0;
+			index--;
+		}
+		else
+		{
+			m_StudentData[i] = returnString[index];
+		}
 	}
 	
 	//m_completeMessage[143] = m_FieldSeparator;
@@ -720,17 +753,18 @@ void Message::buildFromReturnString(char * returnString)
 	index++;
 
 	//ScenarioNo. 1 byte Numeric
-	m_ScenarioNum = returnString[index];
-	index++;
+	m_ScenarioNum = ResponseType;
+	//m_ScenarioNum = returnString[index];
+	//index++;
 
 	//m_completeMessage[145] = m_FieldSeparator;
 
-	if(returnString[index] != '|')
-	{
-		sprintf(errorMessage, "Missing FINAL '|' at position %d? (0 index).", index);
-		msgError(errorMessage);
-	}
-	index++;
+	//if(returnString[index] != '|')
+	//{
+	//	sprintf(errorMessage, "Missing FINAL '|' at position %d? (0 index).", index);
+	//	msgError(errorMessage);
+	//}
+	//index++;
 
 	//m_completeMessage[146] = 0;
 
@@ -742,7 +776,8 @@ void Message::writeToLogFile()
 	formRequestMessage(); //just in case
 	//TODO: fix this so it actually prints out the correct message
 	//*m_logFile << getRequestMessage() << endl;
-	m_logFile->write(getRequestMessage(), sizeof(char) * 146);
+	//m_logFile->write(getRequestMessage(), sizeof(char) * 146);
+	m_logFile->write(getRequestMessage(), sizeof(char) * formRequestMessage());
 	m_logFile->write("\n", sizeof(char));
 }
 

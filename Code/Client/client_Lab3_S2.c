@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 				bool reading = true;
 				int endOfLastMessage = 0;
 				int readIndex = 0;
-				char tempBuf[146];
+				char tempBuf[147];
 				int numSeparators = 0;
 				//TODO: Interpret the read as separate messages
 				//13 '|' per message
@@ -201,17 +201,21 @@ int main(int argc, char *argv[])
 						{
 							numSeparators = 0;
 							//finished with a message from endOfLastMessage to readIndex
-							for(int i = endOfLastMessage; i < readIndex; i++)
+							for(int i = endOfLastMessage; i < readIndex+1; i++)
 							{
 								tempBuf[i - endOfLastMessage] = inBuffer[i];
 							}
 							endOfLastMessage = readIndex;
 
 							// --- Take buffer and convert into a Message
-							returnMessage.buildFromReturnString(tempBuf);
-
+							returnMessage.buildFromReturnString(tempBuf, '1');
+							
 							// --- write returned message to log
 							returnMessage.writeToLogFile();
+
+							//TODO: remove debug printing
+							fwrite(returnMessage.getRequestMessage(), sizeof(char), (returnMessage.getRequestMessage()[1] < 255) ? returnMessage.getRequestMessage()[1] : 255 , stdout); //a bit sketchy but at least it has a max size check. If the target size is less than 255 there could be issues.
+		cout << endl;
 
 							recieveCount++;
 							cout << "Recieved response #" << recieveCount << "." << endl;

@@ -55,8 +55,7 @@ void setSocketNum(int socketNum);
 void justifyRightZeroFillLeft(char * cString, int length);
 
 int formRequestMessage();
-
-void buildFromReturnString(char * returnString);
+void buildFromReturnString(char * returnString, int ResponseType);
 
 void writeToLogFile();
 void writeRecordTrailerToLog();
