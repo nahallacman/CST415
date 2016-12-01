@@ -9,6 +9,14 @@
 #include <string>
 #include <fstream>
 
+#include <sys/time.h>
+
+
+#include <chrono>
+#include <thread>
+
+using namespace std::chrono;
+
 using std::cout;
 using std::endl;
 using std::string;
@@ -46,8 +54,7 @@ char * getTestRequestMessage();
 void displayRequestMessage();
 void displayTestRequestMessage();
 
-char * getCurrentMSTimeString();
-
+char * getCurrentMSTimeString(milliseconds ms);
 
 void setMSTimeStamp(char * msTimeStamp);
 void setOutgoingPort(int portNum);

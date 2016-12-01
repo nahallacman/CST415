@@ -26,6 +26,9 @@ void error(const char *msg)
 
 int main(int argc, char *argv[])
 {
+	milliseconds ms = duration_cast< milliseconds >(
+	    system_clock::now().time_since_epoch()
+	);
 	bool doneSending = false;
 	int sendCount = 0;
 	int recieveCount = 0;
@@ -149,7 +152,7 @@ int main(int argc, char *argv[])
 				realMessage.setResponseDelay("00000");
 			}
 
-			realMessage.setMSTimeStamp(realMessage.getCurrentMSTimeString());
+			realMessage.setMSTimeStamp(realMessage.getCurrentMSTimeString(ms));
 
 			realMessage.setRequestId(sendCount+1);
 
@@ -205,7 +208,7 @@ int main(int argc, char *argv[])
 							{
 								tempBuf[i - endOfLastMessage] = inBuffer[i];
 							}
-							endOfLastMessage = readIndex;
+							endOfLastMessage = readIndex+2;
 
 							// --- Take buffer and convert into a Message
 							returnMessage.buildFromReturnString(tempBuf, '1');
@@ -214,18 +217,19 @@ int main(int argc, char *argv[])
 							returnMessage.writeToLogFile();
 
 							//TODO: remove debug printing
-							fwrite(returnMessage.getRequestMessage(), sizeof(char), (returnMessage.getRequestMessage()[1] < 255) ? returnMessage.getRequestMessage()[1] : 255 , stdout); //a bit sketchy but at least it has a max size check. If the target size is less than 255 there could be issues.
-							cout << endl;
+							//fwrite(returnMessage.getRequestMessage(), sizeof(char), (returnMessage.getRequestMessage()[1] < 255) ? returnMessage.getRequestMessage()[1] : 255 , stdout); //a bit sketchy but at least it has a max size check. If the target size is less than 255 there could be issues.
+							//cout << endl;
 
 							recieveCount++;
 							cout << "Recieved response #" << recieveCount << "." << endl;
 						}
 					}
+
+					readIndex++;
 					if(readIndex >= bytesRead)
 					{
 						reading = false; // we have reached the end of the file that has been read.
 					}
-					readIndex++;
 				}
 
 				
@@ -235,7 +239,7 @@ int main(int argc, char *argv[])
 				// --- clear buffer just in case ----
 		    		bzero(inBuffer,1024);
 			}
-		}
+		} // end if(recieveCount < 101)
 
 		//this could go just after recieveCount++ to save a few cycles if things are not threaded
 		if(recieveCount >= 100)
@@ -244,10 +248,10 @@ int main(int argc, char *argv[])
 		}
 
 		//delay(50 milliseconds)
-		usleep(50000);
+		//usleep(50000);
 		//better way to do this in C++ '11
-		//std::this_thread::sleep_for(std::chrono::milliseconds(x));
-	}
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	} // end WHILE
 
 	int recieveShutdownStatus, sendShutdownStatus, closeStatus = 0;
 

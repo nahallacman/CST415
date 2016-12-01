@@ -257,7 +257,7 @@ void Message::displayRequestMessage()
 }
 
 //gets the current time and returns a 10 character string containing the time in ms
-char * Message::getCurrentMSTimeString()
+char * Message::getCurrentMSTimeString(milliseconds ms)
 {
 	int curTime;
 	char Byte;
@@ -271,18 +271,29 @@ char * Message::getCurrentMSTimeString()
 	//msTimeStamp 10 bytes right justified (probably collected by time)
 	curTime = time(NULL);
 
+	//struct timeval tp, tp2;
+	//gettimeofday(&tp, NULL);
+	//gettimeofday(&tp2, NULL);
+	//int sAndms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+	//int ms = tp.tv_usec / 1000;
+
+
+
+
+
+	milliseconds msDif = duration_cast< milliseconds >(
+	    system_clock::now().time_since_epoch() - ms
+	);
+
+	int iMs;
+	iMs = msDif.count();
+
 	//itoa(curTime, m_timeString, 10); //non-standard, not portable
-	snprintf(m_timeString, 11, "%d", curTime); //portable, and protected from buffer overflows
-/*
-	//printf("Time in ms (int): %d", curTime);
-	//printf("Time in ms (hex): %X", curTime);
-	for(int i =0; i < 4; i++)
-	{
-		Byte = (curTime >> ( i << 3)) & 0xFF;
-		//printf("Byte #%d: %X\n", i, Byte);
-		m_timeString[10-i] = Byte; //is this actually right justified?
-	}
-*/
+	//snprintf(m_timeString, 11, "%d", curTime); //portable, and protected from buffer overflows
+	snprintf(m_timeString, 11, "%d", iMs); //portable, and protected from buffer overflows
+	
+	justifyRightZeroFillLeft(m_timeString, 10);
+
 	return m_timeString;
 }
 
@@ -773,12 +784,14 @@ void Message::buildFromReturnString(char * returnString, int ResponseType)
 
 void Message::writeToLogFile()
 {
-	formRequestMessage(); //just in case
-	//TODO: fix this so it actually prints out the correct message
+	int count = 0;
+	count = formRequestMessage(); //just in case
+
 	//*m_logFile << getRequestMessage() << endl;
 	//m_logFile->write(getRequestMessage(), sizeof(char) * 146);
-	m_logFile->write(getRequestMessage(), sizeof(char) * formRequestMessage());
+	m_logFile->write(getRequestMessage(), sizeof(char) * count);
 	m_logFile->write("\n", sizeof(char));
+	m_logFile->flush(); //attempt to flush this out so I can see what is written to the file for debugging, TODO: maybe remove this
 }
 
 void Message::writeRecordTrailerToLog(int RcvShutdownStatus, int XmtShutdownStatus, int CloseStatus)
@@ -810,9 +823,12 @@ void Message::writeRecordTrailerToLog(int RcvShutdownStatus, int XmtShutdownStat
 
 	//RcvShutdownStatus - 5 char
 
+	//TODO: this is returning something strange. Should only be 5 characters wide total, is 7
 	snprintf(localString, 5, "%d", RcvShutdownStatus); //portable, and protected from buffer overflows
 	
 	justifyRightZeroFillLeft(localString, 5);
+
+	localString[5] = 0; //make sure to null terminate
 
 	*m_logFile << localString << '|';
 
