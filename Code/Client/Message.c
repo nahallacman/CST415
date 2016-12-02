@@ -383,7 +383,7 @@ int Message::formRequestMessage()
 	index++;
 
 	//RequestID 20 bytes Alphanumeric
-	for(int i = 0; i < 20 & m_ClientIPAddress[i] != 0 & m_ClientIPAddress[i] != '|'; i++, index++)
+	for(int i = 0; i < 20 & m_RequestID[i] != 0 & m_RequestID[i] != '|'; i++, index++)
 	{	
 		m_completeMessage[index] = m_RequestID[i];
 	}
@@ -394,7 +394,7 @@ int Message::formRequestMessage()
 	//StudentName 20 bytes Alphanumeric
 	//char name[21] = "BarkmanC            ";
 
-	for(int i = 0; i < 20 & m_ClientIPAddress[i] != 0 & m_ClientIPAddress[i] != '|'; i++, index++)
+	for(int i = 0; i < 20 & m_StudentName[i] != 0 & m_StudentName[i] != '|'; i++, index++)
 	{
 		m_completeMessage[index] = m_StudentName[i];
 	}
