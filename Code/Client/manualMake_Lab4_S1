@@ -1,0 +1,1 @@
+g++ -O0 -std=c++11 -Wno-write-strings -g -o client_Lab4_S1 client_Lab4_S1.c Message.c
