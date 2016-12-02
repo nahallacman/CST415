@@ -257,7 +257,7 @@ void Message::displayRequestMessage()
 }
 
 //gets the current time and returns a 10 character string containing the time in ms
-char * Message::getCurrentMSTimeString(milliseconds ms)
+char * Message::getCurrentMSTimeString(milliseconds startTime)
 {
 	int curTime;
 	char Byte;
@@ -282,7 +282,7 @@ char * Message::getCurrentMSTimeString(milliseconds ms)
 
 
 	milliseconds msDif = duration_cast< milliseconds >(
-	    system_clock::now().time_since_epoch() - ms
+	    system_clock::now().time_since_epoch() - startTime
 	);
 
 	int iMs;
@@ -333,7 +333,7 @@ void Message::justifyRightZeroFillLeft(char * cString, int length)
 	strLen = strlen(cString);
 
 	//make sure this copy goes first or else you will overwrite the data!
-	for(int i = strLen, j = 0; i < length; i++, j++)
+	for(int i = (length - strLen), j = 0; i < length; i++, j++)
 	{
 		cString[i] = cString[j];
 	}

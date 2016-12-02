@@ -26,7 +26,14 @@ void error(const char *msg)
 
 int main(int argc, char *argv[])
 {
-	milliseconds ms = duration_cast< milliseconds >(
+
+	char Times[100][10];
+
+
+
+
+
+	milliseconds startTime = duration_cast< milliseconds >(
 	    system_clock::now().time_since_epoch()
 	);
 	bool doneSending = false;
@@ -152,7 +159,8 @@ int main(int argc, char *argv[])
 				realMessage.setResponseDelay("00000");
 			}
 
-			realMessage.setMSTimeStamp(realMessage.getCurrentMSTimeString(ms));
+			strncpy(Times[sendCount], realMessage.getCurrentMSTimeString(startTime), 10);
+			realMessage.setMSTimeStamp(realMessage.getCurrentMSTimeString(startTime));
 
 			realMessage.setRequestId(sendCount+1);
 
