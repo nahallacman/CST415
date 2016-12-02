@@ -1,0 +1,2 @@
+gdb --args server_S1 2605 
+
