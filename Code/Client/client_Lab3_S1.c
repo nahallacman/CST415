@@ -21,12 +21,15 @@ void error(const char *msg)
 int main(int argc, char *argv[])
 {
 	ofstream logFile;
-	logFile.open("Lab3_Scenario1.log"); //make sure to open the log before using it!
+	logFile.open("Lab3.Scenario1.BarkmanC.log"); //make sure to open the log before using it!
 
 	int local_port;
 	sockaddr_in sin;
 	socklen_t addrlen;
 
+	milliseconds startTime = duration_cast< milliseconds >(
+	    system_clock::now().time_since_epoch()
+	);
 
 	string messageToSend;
 	string testString;
@@ -107,9 +110,10 @@ int main(int argc, char *argv[])
 
 	for(i = 0; i < 100; i++)
 	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 		printf("sending message iteration #: %d\n", i);
 
-		realMessage.setMSTimeStamp(realMessage.getCurrentMSTimeString());
+		realMessage.setMSTimeStamp(realMessage.getCurrentMSTimeString(startTime));
 		realMessage.setOutgoingPort(local_port);
 		realMessage.setSocketNum(sockfd);
 
@@ -160,7 +164,7 @@ int main(int argc, char *argv[])
 		cout << endl;
 
 	// --- Take buffer and convert into a Message
-		returnMessage.buildFromReturnString(buffer);
+		returnMessage.buildFromReturnString(buffer, '1');
 
 	// --- TODO: write returned message to log
 		returnMessage.writeToLogFile();
@@ -168,10 +172,21 @@ int main(int argc, char *argv[])
 	// --- clear buffer just in case ----
     		bzero(buffer,256);
 	}
-    close(sockfd);
+    //close(sockfd);
 
-	realMessage.writeRecordTrailerToLog();
+	int recieveShutdownStatus, sendShutdownStatus, closeStatus = 0;
+
+	recieveShutdownStatus = shutdown(sockfd, 0); 
+	sendShutdownStatus = shutdown(sockfd, 1); 
+
+	closeStatus = close(sockfd);
+
+	// --- clean up everything, finish log ---
+	realMessage.writeRecordTrailerToLog(recieveShutdownStatus, sendShutdownStatus, closeStatus);
 	logFile.close();
+
+	//realMessage.writeRecordTrailerToLog();
+	//logFile.close();
 
     return 0;
 }
