@@ -186,8 +186,13 @@ int main(int argc, char *argv[])
 						// --- write output message log ---
 						returnMessage.writeToLogFile();
 
+						// --- form message to send ---
 						memcpy(outBuffer, returnMessage.getRequestMessage(), 146);
+						// --- actual send ---
+						n = write(newsockfd,outBuffer,146);
+						if (n < 0) error("ERROR writing to socket");
 
+						//TODO: fix this feature
 						//increase the send count so packets can be sent back when there is time.
 						sendCount++;
 
@@ -208,10 +213,13 @@ int main(int argc, char *argv[])
 		}
 		if(sendCount > 0)
 		{
+/*
+			// --- form message to send ---
+			memcpy(outBuffer, returnMessage.getRequestMessage(), 146);
 			// --- actual send ---
 	    		n = write(newsockfd,outBuffer,146);
 	    		if (n < 0) error("ERROR writing to socket");
-
+*/
 
 			sendCountTotal++;
 			sendCount--;
