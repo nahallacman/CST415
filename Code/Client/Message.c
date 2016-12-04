@@ -747,6 +747,7 @@ void Message::buildFromReturnString(char * returnString, int ResponseType)
 		{
 			StudentDataLoopFlag = false;
 			m_StudentData[i] = 0;
+			m_ClientIPAddress[i] = 0;
 			index--;
 		}
 		else
@@ -868,5 +869,16 @@ void Message::setRequestId(int Id)
 	justifyRightZeroFillLeft(tempStr, 20);
 
 	strncpy(m_RequestID, tempStr, 20);
+}
+
+char* Message::getRequestId()
+{
+	m_RequestID[20] = '\0'; //ensure string is null terminated
+	return m_RequestID;
+}
+
+void Message::setScenarioNum(char num)
+{
+	m_ScenarioNum = num;
 }
 

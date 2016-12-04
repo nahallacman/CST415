@@ -71,6 +71,10 @@ void setResponseDelay(char * ResponseDelayString);
 
 void setRequestId(int Id);
 
+char * getRequestId();
+
+void setScenarioNum(char num);
+
 private:
 
 char m_FieldSeparator;
@@ -79,7 +83,7 @@ char m_logFileName[1024];
 char m_TCPHeader [2];
 char m_MessageType [3];
 char m_msTimeStamp [10];
-char m_RequestID [20];
+char m_RequestID [21];
 char m_StudentName [20];
 char m_StudentID [7];
 char m_ResponseDelay [5];
