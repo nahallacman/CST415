@@ -14,6 +14,8 @@
 
 
 
+#include <algorithm>    // std::min
+
 
 
 #include <fcntl.h>
@@ -21,6 +23,9 @@
 using std::string;
 using std::cout;
 using std::endl;
+
+
+using std::min;
 
 const int bufferRetrieveSize = 1500;
 
@@ -64,6 +69,8 @@ int main(int argc, char *argv[])
 
 
 
+
+	int writeSize = 0;
 
 
 
@@ -127,8 +134,35 @@ int main(int argc, char *argv[])
      if (newsockfd < 0) 
           error("ERROR on accept");
 
+
+
+
+
+
 	//set the socket to non-blocking so we don't wait forever on a read!
 	//fcntl(newsockfd, F_SETFL, O_NONBLOCK);
+
+
+	//variables for getting the local port number
+	int local_port;
+	sockaddr_in sin;
+	socklen_t addrlen;
+
+	//get the local port number
+	addrlen = sizeof(sin);
+	if(getsockname(sockfd, (struct sockaddr *)&sin, &addrlen) == 0 &&
+	   sin.sin_family == AF_INET &&
+	   addrlen == sizeof(sin))
+	{
+	    local_port = ntohs(sin.sin_port);
+	}
+	else
+		error("ERROR getting local port number"); // handle error
+
+
+
+
+
 
 
 	//for (i = 0; i < 4; i++)
@@ -212,19 +246,32 @@ int main(int argc, char *argv[])
 
 						returnMessage = recievedMessage;
 						//TODO: update time stamp, plus others probably
-						//returnMessage.formRequestMessage();
+
 						returnMessage.setMSTimeStamp(returnMessage.getCurrentMSTimeString(startTime));
 						returnMessage.setMessageType("RSP");
-
-
+						//returnMessage.setOutgoingPort(local_port);
+						//returnMessage.setSocketNum(newsockfd);
+						returnMessage.formRequestMessage();//TODO: am I accidentally calling this twice?
 
 						// --- write output message log ---
 						returnMessage.writeToLogFile();
 
+
+						if( strlen(returnMessage.getRequestMessage()) < 146 )
+						{
+							writeSize = strlen(outBuffer+2);//there will possibly be a null in the first spot...
+						}
+						else
+						{
+							writeSize = 146;
+						}
+
 						// --- form message to send ---
-						memcpy(outBuffer, returnMessage.getRequestMessage(), 146);
+						memcpy( outBuffer, returnMessage.getRequestMessage(), 146 );
 						// --- actual send ---
-						n = write(newsockfd,outBuffer,146);
+	
+
+						n = write(newsockfd,outBuffer,writeSize);
 						if (n < 0) error("ERROR writing to socket");
 
 						//TODO: fix this feature
