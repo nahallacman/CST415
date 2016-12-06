@@ -27,7 +27,7 @@ void error(const char *msg)
 int main(int argc, char *argv[])
 {
 
-	char Times[100][10];
+	//char Times[100][10];
 
 
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
     //char inBuffer[1024];
 	const int bufferSize = 128*1024;
-	char inBuffer[bufferSize];
+	char inBuffer[bufferSize+1];
     char outBuffer[256];
 
 //	printf("Current time in MS: %s!\n", realMessage.getCurrentMSTimeString());
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 	{
 		if(sendCount < 5000)
 		{
-			printf("sending message iteration #: %d\n", sendCount+1);
+			printf("sending message iteration #: %d\n", sendCount+1); // TODO: remove this printing to improve performance
 			if(sendCount == 25 | sendCount == 75)
 			{
 				realMessage.setResponseDelay("03000");
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 				realMessage.setResponseDelay("00000");
 			}
 
-			strncpy(Times[sendCount], realMessage.getCurrentMSTimeString(startTime), 10);
+			//strncpy(Times[sendCount], realMessage.getCurrentMSTimeString(startTime), 10);
 			realMessage.setMSTimeStamp(realMessage.getCurrentMSTimeString(startTime));
 
 			realMessage.setRequestId(sendCount+1);
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 			if (bytesRead < 0)
 			{ 
 				//error("ERROR reading from socket");
-				cout << "Non-blocking read was empty." << endl;
+				//cout << "Non-blocking read was empty." << endl;
 			}
 			else if(bytesRead > bufferSize) //7*146 = 1022
 			{
@@ -260,7 +260,8 @@ int main(int argc, char *argv[])
 		//delay(50 milliseconds)
 		//usleep(50000);
 		//better way to do this in C++ '11
-		std::this_thread::sleep_for(std::chrono::milliseconds(2));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(2));
+		//std::this_thread::sleep_for(std::chrono::microseconds(10));
 	} // end WHILE
 
 	int recieveShutdownStatus, sendShutdownStatus, closeStatus = 0;

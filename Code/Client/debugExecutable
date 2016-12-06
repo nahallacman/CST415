@@ -1,1 +1,1 @@
-gdb --args client_Lab3_S2 server.cst415.com 2605
+gdb --args client_Lab4_S1 server.cst415.com 2605
