@@ -346,6 +346,7 @@ void Message::justifyRightZeroFillLeft(char * cString, int length)
 
 }
 
+//TODO: change this to "formMessage" as it works for both types
 int Message::formRequestMessage()
 {
 	int curTime = 0;
@@ -747,6 +748,7 @@ void Message::buildFromReturnString(char * returnString, int ResponseType)
 		{
 			StudentDataLoopFlag = false;
 			m_StudentData[i] = 0;
+			m_ClientIPAddress[i] = 0;
 			index--;
 		}
 		else
@@ -790,7 +792,7 @@ void Message::writeToLogFile()
 	//*m_logFile << getRequestMessage() << endl;
 	//m_logFile->write(getRequestMessage(), sizeof(char) * 146);
 	m_logFile->write(getRequestMessage(), sizeof(char) * count);
-	m_logFile->write("\r\n", sizeof(char));
+	m_logFile->write("\r\n", sizeof(char)*2);
 	m_logFile->flush(); //attempt to flush this out so I can see what is written to the file for debugging, TODO: maybe remove this
 }
 
@@ -868,5 +870,24 @@ void Message::setRequestId(int Id)
 	justifyRightZeroFillLeft(tempStr, 20);
 
 	strncpy(m_RequestID, tempStr, 20);
+}
+
+char* Message::getRequestId()
+{
+	m_RequestID[20] = '\0'; //ensure string is null terminated
+	return m_RequestID;
+}
+
+void Message::setMessageType(char* typeStr)
+{
+	for(int i = 0; i < 3 & typeStr[i] != 0; i++)
+	{
+		m_MessageType[i] = typeStr[i];
+	}
+}
+
+void Message::setScenarioNum(char num)
+{
+	m_ScenarioNum = num;
 }
 
