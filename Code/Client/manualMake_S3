@@ -1,0 +1,1 @@
+g++ -O0 -std=c++11 -Wno-write-strings -g -o client_Lab3_S3 client_Lab3_S3.c Message.c timedMessage.c timedMessageIndexer.c
