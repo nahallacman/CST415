@@ -60,6 +60,37 @@ int main(int argc, char *argv[])
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+	milliseconds startTime = duration_cast< milliseconds >(
+	    system_clock::now().time_since_epoch()
+	);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	char tempBuffer[150] = {0};
 	int i = 0;
 	string testString;
@@ -182,6 +213,10 @@ int main(int argc, char *argv[])
 						returnMessage = recievedMessage;
 						//TODO: update time stamp, plus others probably
 						//returnMessage.formRequestMessage();
+						returnMessage.setMSTimeStamp(returnMessage.getCurrentMSTimeString(startTime));
+						returnMessage.setMessageType("RSP");
+
+
 
 						// --- write output message log ---
 						returnMessage.writeToLogFile();

@@ -346,6 +346,7 @@ void Message::justifyRightZeroFillLeft(char * cString, int length)
 
 }
 
+//TODO: change this to "formMessage" as it works for both types
 int Message::formRequestMessage()
 {
 	int curTime = 0;
