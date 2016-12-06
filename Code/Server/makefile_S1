@@ -1,1 +1,1 @@
-g++ -O0 -std=c++11 -Wno-write-strings -g -o server_S1 server_S1.c Message.c
+g++ -O0 -std=c++11 -Wno-write-strings -g -I/home/server/Desktop/CST415/Code/ -o server_S1 server_S1.c ../Common/Message.c

@@ -10,8 +10,8 @@
 #include <string>
 #include <iostream>
 
-#include "Message.h"
-
+//#include "Message.h"
+#include <Common/Message.h>
 
 
 #include <algorithm>    // std::min
@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
 
 						if( strlen(returnMessage.getRequestMessage()) < 146 )
 						{
-							writeSize = strlen(outBuffer+2);//there will possibly be a null in the first spot...
+							writeSize = strlen(returnMessage.getRequestMessage());//there will possibly be a null in the first spot...
 						}
 						else
 						{
