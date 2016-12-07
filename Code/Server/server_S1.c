@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
      int sockfd, newsockfd, portno;
      socklen_t clilen;
-     char buffer[256];
+     //char buffer[256];
      struct sockaddr_in serv_addr, cli_addr;
      int n = 0; 
      if (argc < 2) {
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 				if(inBuffer[readIndex] == '|')
 				{
 					numSeparators++;
-					if(numSeparators > 11)
+					if(numSeparators > 12)
 					{
 						int loopIndex = endOfLastMessage;
 						numSeparators = 0;
@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
 							tempBuf[loopIndex - endOfLastMessage] = inBuffer[loopIndex];
 							loopIndex++;
 						}
-						endOfLastMessage = loopIndex+2;
+						endOfLastMessage = loopIndex;//+2;
 						//if(endOfLastMessage > 2048) //make buffer circular
 						//{
 						//	endOfLastMessage = endOfLastMessage - 2048;
@@ -251,13 +251,20 @@ int main(int argc, char *argv[])
 						returnMessage.setMessageType("RSP");
 						//returnMessage.setOutgoingPort(local_port);
 						//returnMessage.setSocketNum(newsockfd);
+						returnMessage.setScenarioNum('1');
 						returnMessage.formRequestMessage();//TODO: am I accidentally calling this twice?
 
 						// --- write output message log ---
 						returnMessage.writeToLogFile();
 
 
-						if( strlen(returnMessage.getRequestMessage()) < 146 )
+						char* msgPtr = returnMessage.getRequestMessage();
+						for(writeSize = 2; writeSize < 146 & msgPtr[writeSize]!=0; writeSize++)
+						{
+							
+						}
+/*
+						if( strlen(returnMessage.getRequestMessage()+2) < 146 )
 						{
 							writeSize = strlen(returnMessage.getRequestMessage());//there will possibly be a null in the first spot...
 						}
@@ -265,9 +272,10 @@ int main(int argc, char *argv[])
 						{
 							writeSize = 146;
 						}
+*/
 
 						// --- form message to send ---
-						memcpy( outBuffer, returnMessage.getRequestMessage(), 146 );
+						memcpy( outBuffer, returnMessage.getRequestMessage(), writeSize );
 						// --- actual send ---
 	
 
