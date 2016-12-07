@@ -26,6 +26,25 @@ void error(const char *msg)
 
 int main(int argc, char *argv[])
 {
+	const int maxMessageSize = 146;
+	const int MaxNumberOfRuns = 5000;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	//char Times[100][10];
 
@@ -149,7 +168,7 @@ int main(int argc, char *argv[])
 	//{
 	while(!doneSending)
 	{
-		if(sendCount < 5000)
+		if(sendCount < MaxNumberOfRuns)
 		{
 			printf("sending message iteration #: %d\n", sendCount+1); // TODO: remove this printing to improve performance
 			if(sendCount == 25 | sendCount == 75)
@@ -184,7 +203,7 @@ int main(int argc, char *argv[])
 			sendCount++;
 		}
 	
-		if(recieveCount < 5001)
+		if(recieveCount < MaxNumberOfRuns + 1)
 		{
 			//TODO: recieving only works on individual messages currently, needs to be able to read in multiple messages to the buffer on a single read.
 			// --- receive ---
@@ -215,6 +234,20 @@ int main(int argc, char *argv[])
 						numSeparators++;
 						if(numSeparators > 12)
 						{
+							int loopIndex = endOfLastMessage;
+							numSeparators = 0;
+							//finished with a message from endOfLastMessage to readIndex
+							//for(int loopIndex = endOfLastMessage; loopIndex < readIndex+1; loopIndex++)
+
+							while(loopIndex < readIndex+1)
+							{
+								tempBuf[loopIndex - endOfLastMessage] = inBuffer[loopIndex];
+								loopIndex++;
+							}
+							endOfLastMessage = loopIndex;//+2;
+
+
+/*
 							numSeparators = 0;
 							//finished with a message from endOfLastMessage to readIndex
 							for(int i = endOfLastMessage; i < readIndex+1; i++)
@@ -222,6 +255,7 @@ int main(int argc, char *argv[])
 								tempBuf[i - endOfLastMessage] = inBuffer[i];
 							}
 							endOfLastMessage = readIndex;//+2;
+*/
 
 							// --- Take buffer and convert into a Message
 							returnMessage.buildFromReturnString(tempBuf, '1');
@@ -229,7 +263,8 @@ int main(int argc, char *argv[])
 							// --- write returned message to log
 							returnMessage.writeToLogFile();
 
-							//TODO: remove debug printing
+							//TODO: remove debug printing	
+							returnMessage.displayRequestMessage(); // why didn't this get updated??
 							//fwrite(returnMessage.getRequestMessage(), sizeof(char), (returnMessage.getRequestMessage()[1] < 255) ? returnMessage.getRequestMessage()[1] : 255 , stdout); //a bit sketchy but at least it has a max size check. If the target size is less than 255 there could be issues.
 							//cout << endl;
 
@@ -239,9 +274,13 @@ int main(int argc, char *argv[])
 					}
 
 					readIndex++;
-					if(readIndex >= bytesRead)
+					//if(readIndex >= bytesRead)
+					//{
+					//	reading = false; // we have reached the end of the file that has been read.
+					//}
+					if(readIndex >= endOfLastMessage+maxMessageSize)
 					{
-						reading = false; // we have reached the end of the file that has been read.
+						reading = false; // we have (probably) reached the end of the last message we will find in the buffer
 					}
 				}
 
@@ -263,7 +302,7 @@ int main(int argc, char *argv[])
 		//delay(50 milliseconds)
 		//usleep(50000);
 		//better way to do this in C++ '11
-		//std::this_thread::sleep_for(std::chrono::milliseconds(2));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		//std::this_thread::sleep_for(std::chrono::microseconds(10));
 	} // end WHILE
 

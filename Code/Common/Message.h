@@ -70,6 +70,7 @@ void writeRecordTrailerToLog(int RcvShutdownStatus, int XmtShutdownStatus, int C
 void setResponseDelay(char * ResponseDelayString);
 
 void setRequestId(int Id);
+char * getRequestID();
 void setMessageType(char* typeStr);
 char * getRequestId();
 
