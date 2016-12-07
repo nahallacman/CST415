@@ -517,6 +517,8 @@ void Message::buildFromReturnString(char * returnString, int ResponseType)
 	//2 bytes in Big Endian Order
 	m_TCPHeader[0] = returnString[0]; //double check that this is Big Endian byte Order
 	m_TCPHeader[1] = returnString[1]; // 144 bytes long (not including these two bytes)
+	//m_TCPHeader[0] = 0; //double check that this is Big Endian byte Order
+	//m_TCPHeader[1] = (unsigned char)144; // 144 bytes long (not including these two bytes)
 
 	//MessageType fixed as "REQ"
 	//TODO: Make sure this actually says "REQ" first
@@ -748,7 +750,6 @@ void Message::buildFromReturnString(char * returnString, int ResponseType)
 		{
 			StudentDataLoopFlag = false;
 			m_StudentData[i] = 0;
-			m_ClientIPAddress[i] = 0;
 			index--;
 		}
 		else

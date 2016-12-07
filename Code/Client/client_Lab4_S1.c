@@ -168,6 +168,7 @@ int main(int argc, char *argv[])
 
 			realMessage.setScenarioNum('1');
 
+
 			realMessage.formRequestMessage();
 
 			// --- write output message log ---
@@ -212,7 +213,7 @@ int main(int argc, char *argv[])
 					if(inBuffer[readIndex] == '|')
 					{
 						numSeparators++;
-						if(numSeparators > 11)
+						if(numSeparators > 12)
 						{
 							numSeparators = 0;
 							//finished with a message from endOfLastMessage to readIndex
@@ -220,7 +221,7 @@ int main(int argc, char *argv[])
 							{
 								tempBuf[i - endOfLastMessage] = inBuffer[i];
 							}
-							endOfLastMessage = readIndex+2;
+							endOfLastMessage = readIndex;//+2;
 
 							// --- Take buffer and convert into a Message
 							returnMessage.buildFromReturnString(tempBuf, '1');
