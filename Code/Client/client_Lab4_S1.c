@@ -166,6 +166,8 @@ int main(int argc, char *argv[])
 
 			realMessage.setRequestId(sendCount+1);
 
+			realMessage.setScenarioNum('1');
+
 			realMessage.formRequestMessage();
 
 			// --- write output message log ---
