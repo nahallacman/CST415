@@ -80,9 +80,8 @@ int processReadData(char * inBuffer, int bytesRead)
 		//there is still stuff left, get the remaining tokens processed
 		if(token == NULL)
 		{
-			
-			//token = std::strtok(inBuffer+amountRead+1, "|\0");
-			token = std::strtok(NULL, "|\0");
+
+			token = std::strtok(inBuffer+amountRead, "|\0");
 			amountRead++;
 			//DEBUG!!:
 			//return -1;
@@ -115,7 +114,7 @@ void testProcessReadData()
 	strArrayIndex = 0;
 
 
-	char testString2[] = "\0�RSP|1234567890|000000000000000000002|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0�RSP|9999999999|\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+	char testString2[] = "\0�RSP|0000045007|000000000000000000002|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0�RSP|9999999999|\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 
 	char testString3[] = "00000000000000000003|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0�RSP|0000045007|00000000000000000004|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0";
 
@@ -145,6 +144,108 @@ void testProcessReadData()
 		cout << "error in number of strings procesed" << endl;
 	}
 }
+
+/*
+int processReadData(int bytesRead, int bufferSize, int maxMessageSize, char * inBuffer, int &unfinishedReadIndex, int &endOfLastMessage)
+{
+	//unfinishedReadIndex = 9999; //TODO: debug only, remove this line
+	int recieveCount = 0;
+	Message returnMessage;
+	//printf("After Read Debug Message");
+	if (bytesRead < 0)
+	{ 
+		//error("ERROR reading from socket");
+		//cout << "Non-blocking read was empty." << endl;
+	}
+	else if(bytesRead > bufferSize) //7*146 = 1022
+	{
+		error("ERROR reading from socket, unballanced read performed.");
+	}
+	else
+	{
+		
+		bool reading = true;
+		endOfLastMessage = 0;
+		int readIndex = 0;
+		char tempBuf[147];
+		int numSeparators = 0;
+		//TODO: Interpret the read as separate messages
+		//13 '|' per message
+		while(reading)
+		{
+			if(inBuffer[readIndex] == '|')
+			{
+				numSeparators++;
+				if(numSeparators > 12)
+				{
+					
+					int loopIndex = endOfLastMessage;
+					numSeparators = 0;
+					//finished with a message from endOfLastMessage to readIndex
+					//for(int loopIndex = endOfLastMessage; loopIndex < readIndex+1; loopIndex++)
+
+					while(loopIndex < readIndex+1)
+					{
+						tempBuf[loopIndex - endOfLastMessage] = inBuffer[loopIndex];
+						loopIndex++;
+					}
+					tempBuf[readIndex+1] = 0; //ensure null termination //TODO: confirm this is the right spot
+					endOfLastMessage = loopIndex;//+2;
+
+
+	
+//					numSeparators = 0;
+//					//finished with a message from endOfLastMessage to readIndex
+//					for(int i = endOfLastMessage; i < readIndex+1; i++)
+//					{
+//						tempBuf[i - endOfLastMessage] = inBuffer[i];
+//					}
+//					endOfLastMessage = readIndex;//+2;
+	
+
+					// --- Take buffer and convert into a Message
+					returnMessage.buildFromReturnString(tempBuf, '1');
+				
+					// --- write returned message to log
+					//returnMessage.writeToLogFile(); //TODO START!: this causes a segmentation fault. Why?
+
+					//TODO: remove debug printing	
+					returnMessage.displayRequestMessage(); // why didn't this get updated??
+					//fwrite(returnMessage.getRequestMessage(), sizeof(char), (returnMessage.getRequestMessage()[1] < 255) ? returnMessage.getRequestMessage()[1] : 255 , stdout); //a bit sketchy but at least it has a max size check. If the target size is less than 255 there could be issues.
+					//cout << endl;
+
+					recieveCount++;
+					//cout << "Recieved response #" << recieveCount << "." << endl;
+					
+				}
+			}
+
+			readIndex++;
+			if(readIndex > bytesRead)
+			{
+				reading = false; // we have reached the end of the file that has been read.
+				if(numSeparators > 0 && numSeparators < 12)
+				{
+					unfinishedReadIndex = readIndex;
+				}
+				else
+				{	
+					unfinishedReadIndex = 0;
+				}
+			}
+		}
+
+	
+
+
+
+		// --- clear buffer just in case ----
+		//bzero(inBuffer,bufferSize);
+		
+	}
+	return recieveCount;
+}
+*/
 
 int main(int argc, char *argv[])
 {
