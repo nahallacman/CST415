@@ -237,7 +237,7 @@ int client()
 	//For the connection information
 	struct sockaddr_in server;
 	//For recieving
-	char server_reply[2000 + 1];
+	char server_reply[2000 + 1] = { 0 };
 	int recv_size;
 
 	printf("\nInitialising Winsock...");
@@ -270,28 +270,84 @@ int client()
 	puts("Connected");
 
 	//Send some data
-	char message[] = "GET / HTTP/1.1\r\n\r\n";
-	if (send(s, message, strlen(message), 0) < 0)
-	{
-		puts("Send failed");
-		return 1;
-	}
-	puts("Data Send\n");
+	char message[] = "\0�REQ|0000045007|00000000000000000001|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0";
 
-	//Receive a reply from the server
-	if ((recv_size = recv(s, server_reply, 2000, 0)) == SOCKET_ERROR)
-	{
-		puts("recv failed");
-	}
-	else
-	{
-		puts("Reply received\n");
+	//TODO: create a message, send 1 message, update message contents, form message from response, log messages to file, loop 10,000 sends
+	// make the recieve non-blocking
+	bool blocking = false;
 
-		//Add a NULL terminating character to make it a proper string before printing
-		server_reply[recv_size] = '\0';
-		puts(server_reply);
-
+	unsigned long mode = blocking ? 0 : 1;
+	if ((ioctlsocket(s, FIONBIO, &mode) == 0) ? true : false)
+	{
+		//no errors
 	}
+	else{//errors
+		cout << "Error putting socket into non-blocking mode." << endl;
+	}
+
+	int sendCount = 0;
+	int recieveCount = 0;
+	bool doneReading = false;
+	while (!doneReading)
+	{
+		if (sendCount < 10000)
+		{
+			if (send(s, message, 146, 0) < 0)
+			{
+				puts("Send failed");
+				return 1;
+			}
+			else
+			{
+				sendCount++;
+				if ((sendCount % 100) == 0)
+				{
+					cout << "sendCount=" << sendCount << endl;
+				}
+			}
+			//puts("Data Send\n");
+			if (sendCount >= 9999)
+			{
+				cout << "Done sending, now waiting for recieve." << endl;
+			}
+		}
+
+		//Receive a reply from the server
+		if (recieveCount < 10000*146 - 1)
+		{
+			//if ((recv_size = recv(s, server_reply, 2000, 0)) == SOCKET_ERROR)
+			//{
+			//	puts("recv failed");
+			//}
+			//else if (recv_size == 0)
+			//{
+			//}
+			//else
+			if ((recv_size = recv(s, server_reply, 2000, 0)) > 0)
+			{
+				//puts("Reply received\n");
+				//Add a NULL terminating chara//cter to make it a proper string before printing
+				server_reply[recv_size] = '\0';
+				//puts(server_reply + 2);
+				recieveCount += recv_size;
+				if ((recieveCount % 100) == 0)
+				{
+					cout << "recieveCount=" << recieveCount << endl;
+				}
+			}
+
+		}
+		else
+		{
+			doneReading = true;
+		}
+
+		int loop = 0;
+		while (++loop < 1000000);
+		
+	}
+
+	cout << "finished sending" << endl;
 
 
 	//Clean up
@@ -414,12 +470,18 @@ int main(int argc, char *argv[])
 	startTime = duration_cast< milliseconds >(
 		system_clock::now().time_since_epoch()
 		);
+	try
+	{
 
-	//testProcessReadData();
-	server();
-	//client();
-
-	return 0;
+		//testProcessReadData();
+		//server();
+		client();
+		// ...
+	}
+	catch (...) {
+		// ...
+	}
+//	return 0;
 }
 
 
