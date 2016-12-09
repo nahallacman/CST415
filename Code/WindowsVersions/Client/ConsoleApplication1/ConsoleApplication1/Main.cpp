@@ -9,7 +9,8 @@
 #include <iostream>
 
 
-#include "D:\School\CST415\Code\Common/Message.hpp"
+//#include "D:\School\CST415\Code\Common/Message.hpp"
+#include "..\..\..\..\Common\Message.hpp"
 //#include <Common/Message.h>
 
 
