@@ -62,6 +62,7 @@ int strArrayIndex;
 char messageBuffer[146];
 std::list<Message> MessageQueue;
 std::ofstream logFile;
+milliseconds startTime;
 
 using namespace std;
 
@@ -368,8 +369,8 @@ int server()
 			thisRecieveCount = processReadData(server_reply, recv_size);
 			recieveCount += thisRecieveCount;
 
-			list iterator = MessageQueue.end();
-			list oldEnd = MessageQueue.end();
+			std::list<Message>::iterator iterator = MessageQueue.end();
+			std::list<Message>::iterator oldEnd = MessageQueue.end();
 			for (int i = 0; i < thisRecieveCount; i)//move the iterator back to where the just recieved Messages are kept
 			{
 				iterator--;
@@ -378,16 +379,16 @@ int server()
 			while (iterator != oldEnd)
 			{
 				//get a copy of the message that was recieved
-				Message locMessage(*iterator);
+				Message localMessage(*iterator);
 
-				locMessage.setMSTimeStamp(returnMessage.getCurrentMSTimeString(startTime));
-				locMessage.setMessageType("RSP");
+				localMessage.setMSTimeStamp(localMessage.getCurrentMSTimeString(startTime));
+				localMessage.setMessageType("RSP");
 				//returnMessage.setOutgoingPort(local_port);
 				//returnMessage.setSocketNum(newsockfd);
-				locMessage.setScenarioNum('1');
+				localMessage.setScenarioNum('1');
 
 				int writeSize = 0;
-				char* msgPtr = returnMessage.getRequestMessage();
+				char* msgPtr = localMessage.getRequestMessage();
 				for (writeSize = 2; writeSize < 146 & msgPtr[writeSize] != 0; writeSize++)
 				{
 
@@ -409,9 +410,14 @@ int server()
 
 int main(int argc, char *argv[])
 {
+
+	startTime = duration_cast< milliseconds >(
+		system_clock::now().time_since_epoch()
+		);
+
 	//testProcessReadData();
-	//server();
-	client();
+	server();
+	//client();
 
 	return 0;
 }
