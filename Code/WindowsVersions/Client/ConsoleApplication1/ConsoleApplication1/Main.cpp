@@ -304,7 +304,7 @@ int server()
 	struct sockaddr_in server, client;
 	int c;
 
-	char server_reply[2000 + 1];
+	char server_reply[2000 + 1] = { 0 };
 	int recv_size;
 
 	printf("\nInitialising Winsock...");
@@ -356,9 +356,9 @@ int server()
 	while (recieveCount < 5000)
 	{
 		//Receive a reply from the server
-		if ((recv_size = recv(s, server_reply, 2000, 0)) == SOCKET_ERROR)
+		if ((recv_size = recv(new_socket, server_reply, 2000, 0)) == SOCKET_ERROR)
 		{
-			puts("recv failed");
+			//puts("recv failed");
 		}
 		else
 		{
