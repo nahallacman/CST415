@@ -2,20 +2,30 @@
 #define MESSAGE_H
 #include "stdint.h"
 #include <stdio.h>
-#include <time.h>
+//#include <time.h>
 #include <string.h>
 #include <iostream>
 #include <stdlib.h>
-#include <string>
+//#include <string>
 #include <fstream>
 
-#include <sys/time.h>
+//#include <sys/time.h>
+
+
+
+//for stringstream
+#include <sstream>
+#include <string>
+#include <iostream>
+
 
 
 #include <chrono>
 #include <thread>
 
 using namespace std::chrono;
+
+using namespace std;
 
 using std::cout;
 using std::endl;
@@ -70,6 +80,7 @@ void writeRecordTrailerToLog(int RcvShutdownStatus, int XmtShutdownStatus, int C
 void setResponseDelay(char * ResponseDelayString);
 
 void setRequestId(int Id);
+char * getRequestID();
 void setMessageType(char* typeStr);
 char * getRequestId();
 
@@ -102,5 +113,6 @@ char m_timeString[11];
 ofstream* m_logFile;
 
 };
-
+/*
+*/
 #endif
