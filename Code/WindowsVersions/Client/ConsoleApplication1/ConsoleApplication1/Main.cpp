@@ -289,6 +289,7 @@ int client()
 		//Add a NULL terminating character to make it a proper string before printing
 		server_reply[recv_size] = '\0';
 		puts(server_reply);
+
 	}
 
 
@@ -362,12 +363,41 @@ int server()
 		}
 		else
 		{
+			int thisRecieveCount = 0;
 			puts("Reply received\n");
-			recieveCount += processReadData(server_reply, recv_size);
+			thisRecieveCount = processReadData(server_reply, recv_size);
+			recieveCount += thisRecieveCount;
 
-			//Reply to client
-			char message[] = "Hello Client , I have received your connection. But I have to go now, bye\n";
-			send(new_socket, message, strlen(message), 0);
+			list iterator = MessageQueue.end();
+			list oldEnd = MessageQueue.end();
+			for (int i = 0; i < thisRecieveCount; i)//move the iterator back to where the just recieved Messages are kept
+			{
+				iterator--;
+			}
+
+			while (iterator != oldEnd)
+			{
+				//get a copy of the message that was recieved
+				Message locMessage(*iterator);
+
+				locMessage.setMSTimeStamp(returnMessage.getCurrentMSTimeString(startTime));
+				locMessage.setMessageType("RSP");
+				//returnMessage.setOutgoingPort(local_port);
+				//returnMessage.setSocketNum(newsockfd);
+				locMessage.setScenarioNum('1');
+
+				int writeSize = 0;
+				char* msgPtr = returnMessage.getRequestMessage();
+				for (writeSize = 2; writeSize < 146 & msgPtr[writeSize] != 0; writeSize++)
+				{
+
+				}
+
+				send(new_socket, msgPtr, writeSize, 0);
+
+				iterator++;
+				
+			}
 		}
 	}
 
