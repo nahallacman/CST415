@@ -157,6 +157,11 @@ int processReadData(char * inBuffer, int bytesRead)
 	char *token;
 	bool middleRead = false;
 
+/*	if (lastCount > 0) // for some reason we are reading in the middle of a string, so beware an extra cell read
+	{
+		lastCount--;
+	}
+	*/
 	if (inBuffer[0] != 0)
 	{
 		//if (lastDelimiter == '\0')
@@ -167,20 +172,39 @@ int processReadData(char * inBuffer, int bytesRead)
 		//}
 		//we have started reading in the middle of a token. This means we are concatenating onto an old token.
 		//token = std::strtok(inBuffer, "|");
-		if (lastCount < strArrayIndex)
-		{
-			cout << "test" << endl;
-			//concatenate two strings now!!!!!!
-		}
 		token = myStrTok(inBuffer, '|');
 
-		//middleRead = true;
-		//strArrayIndex--; //go back to the older string
+
+
+		if (lastCount < strArrayIndex)
+		{
+			//cout << "test" << endl;
+			//concatenate two strings now!!!!!!
+			char temp[21];
+			int strLen = strlen(strPtrArray[strArrayIndex - 1]);
+			strncpy(temp, strPtrArray[strArrayIndex - 1], 20);
+			int i, j;
+			for (i = 0, j = strLen; (i < 20) & (inBuffer[i] != '|') & (inBuffer[i] != '\0'); ++i, ++j)
+			{
+				temp[j] = inBuffer[i];
+			}
+			temp[20] = 0; //ensure null termination
+
+			amountRead += j - strLen;//get the size of the second string we wrote
+			strncpy(strPtrArray[strArrayIndex - 1], temp, 20); //reinsert the full version
+			
+
+			
+			//prepare for the next loop
+			//token = std::strtok(NULL, "|");
+			token = myStrTok(NULL, '|'); // move the token pointer on to the next value
+
+		}
+
 	}
 	else
-	{ 
-		//token = std::strtok(inBuffer + 1, "|");
-		token = myStrTok(inBuffer + 1, '|');
+	{ 		token = myStrTok(inBuffer + 1, '|');
+
 	}
 
 	while (amountRead < bytesRead)
@@ -234,7 +258,7 @@ int processReadData(char * inBuffer, int bytesRead)
 	lastCount += delimiterCount;
 	if (lastCount > 12) // if the count goes over, roll back
 	{
-		lastCount -= 12;
+		lastCount -= 13;
 	}
 	delimiterCount = 0;//reset this
 
@@ -253,13 +277,14 @@ void testProcessReadData()
 	char testString3[] = "00000000000000000003|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0�RSP|0000045007|00000000000000000004|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0";
 
 	//TODO: Fix this test case if it ends up happeneing to me!
-	char testString4[] = "\0�RSP|0000045007|00000000000000000001|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0�RSP|0000045007|1234567890";
+	char testString4[] = "\0�RSP|0000045007|00000000000000000005|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0�RSP|0000045007|1234567890";
 
 	char testString5[] = "1234567890|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0";
 
+	char testString6[] = "\0�RSP|0000045007|00000000000000000007|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0�RSP|0000045007|00000000000000000008|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0";
 
 
-	logFile.open("Lab4.Scenario1.BarkmanC.txt"); //make sure to open the log before using it!
+	//logFile.open("Lab4.Scenario1.BarkmanC.txt"); //make sure to open the log before using it!
 
 	processedCount += processReadData(testString, 146);
 
@@ -288,11 +313,36 @@ void testProcessReadData()
 
 	processedCount += processReadData(testString4, 172);
 
+	if (lastCount != 2)//TODO_NOW: figure out why the lastCount is 1 too high after this and the other place I set it to 0
+	{
+		cout << "error in number delimiters counted" << endl;
+		//lastCount = 0;
+	}
+
 	processedCount += processReadData(testString5, 120);
 
+	if (lastCount != 0)//TODO_NOW: figure out why the lastCount is 1 too high after this and the other place I set it to 0
+	{
+		cout << "error in number delimiters counted" << endl;
+		//lastCount = 0;
+	}
 
 	if (processedCount < 6)
 	//if (processedCount < 4)
+	{
+		cout << "error in number of strings procesed" << endl;
+	}
+
+	processedCount += processReadData(testString6, 292);
+
+	if (lastCount != 0)//TODO_NOW: figure out why the lastCount is 1 too high after this and the other place I set it to 0
+	{
+		cout << "error in number delimiters counted" << endl;
+		//lastCount = 0;
+	}
+
+	if (processedCount < 8)
+		//if (processedCount < 4)
 	{
 		cout << "error in number of strings procesed" << endl;
 	}
@@ -513,8 +563,8 @@ int main(int argc, char *argv[])
 	if(logFile.is_open())
 	{ 
 		//logFile << "TEST" << endl;
-		testProcessReadData();
-		//server();
+		//testProcessReadData();
+		server();
 		//client();
 	}
 
@@ -524,9 +574,10 @@ int main(int argc, char *argv[])
 		cur.writeToLogFile();
 		//MessageQueue.remove(cur);
 		//MessageQueue.pop_front(); // remove the message so it won't be printed again
+		//logFile << "Test" << endl;
 	}
-
 	logFile.close();
+
 	return 0;
 }
 

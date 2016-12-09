@@ -809,6 +809,8 @@ void Message::writeToLogFile()
 	int count = 0;
 	count = formRequestMessage(); //just in case
 
+	//cout << getRequestMessage() + 1 << endl;
+
 	//*m_logFile << getRequestMessage() << endl;
 	//m_logFile->write(getRequestMessage(), sizeof(char) * 146);
 	m_logFile->write(getRequestMessage(), sizeof(char) * count);
