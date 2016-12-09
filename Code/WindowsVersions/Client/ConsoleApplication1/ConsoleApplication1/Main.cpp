@@ -15,7 +15,7 @@
 
 
 //for strtok
-//#include <cstring>
+//#include <cstring>//
 //#include <iostream>
 
 //for list
@@ -255,7 +255,7 @@ int client()
 
 	printf("Socket created.\n");
 
-	server.sin_addr.s_addr = inet_addr("192.168.11.57");
+	server.sin_addr.s_addr = inet_addr("192.168.11.47");
 	server.sin_family = AF_INET;
 	server.sin_port = htons(2605);
 
@@ -282,12 +282,14 @@ int client()
 	{
 		puts("recv failed");
 	}
+	else
+	{
+		puts("Reply received\n");
 
-	puts("Reply received\n");
-
-	//Add a NULL terminating character to make it a proper string before printing
-	server_reply[recv_size] = '\0';
-	puts(server_reply);
+		//Add a NULL terminating character to make it a proper string before printing
+		server_reply[recv_size] = '\0';
+		puts(server_reply);
+	}
 
 
 	//Clean up
@@ -378,7 +380,8 @@ int server()
 int main(int argc, char *argv[])
 {
 	//testProcessReadData();
-	server();
+	//server();
+	client();
 
 	return 0;
 }
