@@ -254,9 +254,9 @@ int client()
 
 	printf("Socket created.\n");
 
-	server.sin_addr.s_addr = inet_addr("172.217.3.174");
+	server.sin_addr.s_addr = inet_addr("192.168.11.57");
 	server.sin_family = AF_INET;
-	server.sin_port = htons(80);
+	server.sin_port = htons(2605);
 
 	//Connect to remote server
 	if (connect(s, (struct sockaddr *)&server, sizeof(server)) < 0)
@@ -324,7 +324,7 @@ int server()
 	//Prepare the sockaddr_in structure
 	server.sin_family = AF_INET;
 	server.sin_addr.s_addr = INADDR_ANY;
-	server.sin_port = htons(8888);
+	server.sin_port = htons(2605);
 
 	//Bind
 	if (::bind(s, (struct sockaddr *)&server, sizeof(server)) == SOCKET_ERROR)// the :: means pull from gobal namespace. using namespace std; causes this need.
