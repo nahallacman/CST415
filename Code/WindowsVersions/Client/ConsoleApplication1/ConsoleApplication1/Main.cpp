@@ -301,6 +301,9 @@ int server()
 	struct sockaddr_in server, client;
 	int c;
 
+	char server_reply[2000 + 1];
+	int recv_size;
+
 	printf("\nInitialising Winsock...");
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 	{
@@ -346,9 +349,24 @@ int server()
 
 	puts("Connection accepted");
 
-	//Reply to client
-	char message[] = "Hello Client , I have received your connection. But I have to go now, bye\n";
-	send(new_socket, message, strlen(message), 0);
+	int recieveCount = 0;
+	while (recieveCount < 5000)
+	{
+		//Receive a reply from the server
+		if ((recv_size = recv(s, server_reply, 2000, 0)) == SOCKET_ERROR)
+		{
+			puts("recv failed");
+		}
+		else
+		{
+			puts("Reply received\n");
+			recieveCount += processReadData(server_reply, recv_size);
+
+			//Reply to client
+			char message[] = "Hello Client , I have received your connection. But I have to go now, bye\n";
+			send(new_socket, message, strlen(message), 0);
+		}
+	}
 
 	closesocket(s);
 	WSACleanup();
