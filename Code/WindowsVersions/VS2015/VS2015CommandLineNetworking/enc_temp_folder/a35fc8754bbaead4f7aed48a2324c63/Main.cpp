@@ -170,7 +170,6 @@ int processReadData(char * inBuffer, int bytesRead)
 		if (lastCount < strArrayIndex)
 		{
 			cout << "test" << endl;
-			//concatenate two strings now!!!!!!
 		}
 		token = myStrTok(inBuffer, '|');
 
