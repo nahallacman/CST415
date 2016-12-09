@@ -809,10 +809,13 @@ void Message::writeToLogFile()
 	int count = 0;
 	count = formRequestMessage(); //just in case
 
+	//cout << getRequestMessage() + 1 << endl;
+
 	//*m_logFile << getRequestMessage() << endl;
 	//m_logFile->write(getRequestMessage(), sizeof(char) * 146);
 	m_logFile->write(getRequestMessage(), sizeof(char) * count);
-	m_logFile->write("\r\n", sizeof(char)*2);
+	//m_logFile->write("\r\n", sizeof(char)*2);
+	m_logFile->write("\n", sizeof(char));
 	m_logFile->flush(); //attempt to flush this out so I can see what is written to the file for debugging, TODO: maybe remove this
 }
 

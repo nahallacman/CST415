@@ -152,6 +152,10 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Message.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Lab4.Scenario1.BarkmanC.txt" />
+    <Text Include="test.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
