@@ -297,7 +297,7 @@ char * Message::getCurrentMSTimeString(milliseconds startTime)
 	//snprintf(m_timeString, 11, "%d", iMs); //portable, and protected from buffer overflows
 	
 	std::stringstream str_stream;
-	str_stream << iMs << std::endl;
+	str_stream << iMs; //<< std::endl;
 	string str(str_stream.str());
 	strncpy(m_timeString, str.c_str(), 11);
 	
@@ -319,7 +319,7 @@ void Message::setOutgoingPort(int portNum)
 	char tempStr[6];
 
 	std::stringstream str_stream;
-	str_stream << portNum << std::endl;
+	str_stream << portNum; //<< std::endl;
 	string str(str_stream.str());
 	strncpy(tempStr, str.c_str(), 6);
 
@@ -335,8 +335,8 @@ void Message::setSocketNum(int socketNum)
 	char tempStr[6];
 
 	std::stringstream str_stream;
-	str_stream << socketNum << std::endl;
-	string str(str_stream.str());
+	str_stream << socketNum;// << std::endl;
+	string str i= str_stream.str();
 	strncpy(tempStr, str.c_str(), 6);
 
 	//snprintf(tempStr, 6, "%d", socketNum); //portable, and protected from buffer overflows
@@ -902,7 +902,7 @@ void Message::setRequestId(int Id)
 	char tempStr[20];
 
 	std::stringstream str_stream;
-	str_stream << Id << std::endl;
+	str_stream << Id;// << std::endl;
 	string str(str_stream.str());
 	strncpy(tempStr, str.c_str(), 5);
 

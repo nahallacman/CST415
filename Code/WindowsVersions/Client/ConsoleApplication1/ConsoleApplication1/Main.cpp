@@ -399,8 +399,36 @@ int client()
 
 	//Send some data
 	char message[] = "\0�REQ|0000045007|00000000000000000001|BarkmanC            |17-7918|00000|10.1.20.29     |45994|00004|192.168.101.220|02605|ABCDEFGHIJKLMNOPQRST|1|\0";
-
+	unsigned char length[3];
+	length[0] = 0;
+	length[1] = 144;
+	length[2] = 0;
+	char timeStamp[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	//TODO: create a message, send 1 message, update message contents, form message from response, log messages to file, loop 10,000 sends
+	Message realMessage(
+		//"testLog.log",
+		&logFile,
+		length,
+		"REQ",
+		timeStamp,
+		"11111111111111111111",
+		"BarkmanC            ",
+		"17-7918",
+		"00000",
+		//"10.1.20.29     ",
+		"10.1.20.29     ",
+		"17784",
+		"    3",
+		"192.168.101.220",
+		"02605",
+		"ABCDEFGHIJKLMNOPQRST",
+		'1');
+
+	realMessage.setMSTimeStamp(realMessage.getCurrentMSTimeString(startTime));
+
+
+
+
 	// make the recieve non-blocking
 	bool blocking = false;
 
@@ -420,7 +448,9 @@ int client()
 	{
 		if (sendCount < 10000)
 		{
-			if (send(s, message, 146, 0) < 0)
+			realMessage.setRequestId(sendCount + 1);
+			realMessage.formRequestMessage();
+			if (send(s, realMessage.getRequestMessage(), 146, 0) < 0)
 			{
 				puts("Send failed");
 				return 1;
