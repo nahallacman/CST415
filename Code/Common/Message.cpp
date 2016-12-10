@@ -336,7 +336,7 @@ void Message::setSocketNum(int socketNum)
 
 	std::stringstream str_stream;
 	str_stream << socketNum;// << std::endl;
-	string str i= str_stream.str();
+	string str = str_stream.str();
 	strncpy(tempStr, str.c_str(), 6);
 
 	//snprintf(tempStr, 6, "%d", socketNum); //portable, and protected from buffer overflows
@@ -853,7 +853,7 @@ void Message::writeRecordTrailerToLog(int RcvShutdownStatus, int XmtShutdownStat
 	std::stringstream str_stream;
 	str_stream << RcvShutdownStatus << std::endl;
 	string str(str_stream.str());
-	strncpy(localString, str.c_str(), 5);
+	strncpy(localString, str.c_str(), 6);
 	
 	justifyRightZeroFillLeft(localString, 5);
 
@@ -866,7 +866,7 @@ void Message::writeRecordTrailerToLog(int RcvShutdownStatus, int XmtShutdownStat
 	std::stringstream str_streamA;
 	str_streamA << XmtShutdownStatus << std::endl;
 	string strA(str_stream.str());
-	strncpy(localString, strA.c_str(), 5);
+	strncpy(localString, strA.c_str(), 6);
 
 	//snprintf(localString, 5, "%d", XmtShutdownStatus); //portable, and protected from buffer overflows
 	
@@ -878,7 +878,7 @@ void Message::writeRecordTrailerToLog(int RcvShutdownStatus, int XmtShutdownStat
 	std::stringstream str_streamB;
 	str_streamB << CloseStatus << std::endl;
 	string strB(str_streamB.str());
-	strncpy(localString, strB.c_str(), 5);
+	strncpy(localString, strB.c_str(), 6);
 
 	//snprintf(localString, 5, "%d", CloseStatus); //portable, and protected from buffer overflows
 	
@@ -903,8 +903,8 @@ void Message::setRequestId(int Id)
 
 	std::stringstream str_stream;
 	str_stream << Id;// << std::endl;
-	string str(str_stream.str());
-	strncpy(tempStr, str.c_str(), 5);
+	string str = str_stream.str();
+	strncpy(tempStr, str.c_str(), 6);
 
 	//snprintf(tempStr, 20, "%d", Id); //portable, and protected from buffer overflows
 

@@ -68,21 +68,30 @@ int lastCount;
 //bool endNull;
 //char lastDelimiter;
 
+
+milliseconds beginRequests;
+milliseconds endRequests;
+milliseconds beginResponses;
+milliseconds endResponses;
+
 using namespace std;
 
 void writeLogTrailer()
 {
 
+	milliseconds ReqRunDur = endRequests - beginRequests;
+	milliseconds RspRunDur = endResponses - beginResponses;
+	milliseconds TransDur = endResponses - beginRequests;
 
 	logFile << "Requests transmitted = [10000]" << endl;
 	logFile << "Responses received = [10000]" << endl;
-	logFile << "Req.run duration(ms) = [xxxxxxxxx]" << endl;
-	logFile << "Rsp.Run duration(ms) = [xxxxxxxxx]" << endl;
-	logFile << "Trans.Duration(ms) = [xxxxxxxxx]" << endl;
-	logFile << "Actual req.pace(ms) = [xxxx]" << endl;
-	logFile << "Actual rsp.Pace(ms) = [xxxx]" << endl;
+	logFile << "Req.run duration(ms) = [" << ReqRunDur.count() << "]" << endl;
+	logFile << "Rsp.Run duration(ms) = [" << RspRunDur.count() << "]" << endl;
+	logFile << "Trans.Duration(ms) = [" << TransDur.count() << "]" << endl;
+	logFile << "Actual req.pace(ms) = [" << ReqRunDur.count() / 10000 << "]" << endl;
+	logFile << "Actual rsp.Pace(ms) = [" << RspRunDur.count() / 10000 << "]" << endl;
 	logFile << "Configured pace(ms) = [0000]" << endl;
-	logFile << "Transaction avg. (ms) = [xxxx]" << endl;
+	logFile << "Transaction avg. (ms) = [" << TransDur.count() / 10000 << "]" << endl;
 	logFile << "Your name : Cal" << endl;
 	logFile << "Name of student whose client was used : Cal" << endl;
 
@@ -116,7 +125,7 @@ int buildTokensIntoString()
 	Message localMessage(&logFile);
 	// --- Take buffer and convert into a Message
 	localMessage.buildFromReturnString(messageBuffer, '1');
-	localMessage.setMessageType("REQ");
+	localMessage.setMessageType("RSP");
 	MessageQueue.push_back(localMessage);
 
 	//cout << "End buildTokensIntoString()" << endl;
@@ -442,7 +451,7 @@ int client()
 		"ABCDEFGHIJKLMNOPQRST",
 		'1');
 
-	realMessage.setMSTimeStamp(realMessage.getCurrentMSTimeString(startTime));
+	
 
 
 
@@ -459,14 +468,24 @@ int client()
 		cout << "Error putting socket into non-blocking mode." << endl;
 	}
 
+
+
 	int sendCount = 0;
 	int recieveCount = 0;
 	bool doneReading = false;
+
+	beginRequests = duration_cast< milliseconds >(
+		system_clock::now().time_since_epoch()
+		);
+
+
 	while (!doneReading)
 	{
 		if (sendCount < 10000)
 		{
 			realMessage.setRequestId(sendCount + 1);
+			realMessage.setScenarioNum('2');
+			realMessage.setMSTimeStamp(realMessage.getCurrentMSTimeString(startTime));
 			realMessage.formRequestMessage();
 			if (send(s, realMessage.getRequestMessage(), 146, 0) < 0)
 			{
@@ -475,6 +494,7 @@ int client()
 			}
 			else
 			{
+				MessageQueue.push_back(realMessage);
 				sendCount++;
 				if ((sendCount % 100) == 0)
 				{
@@ -482,14 +502,17 @@ int client()
 				}
 			}
 			//puts("Data Send\n");
-			if (sendCount >= 9999)
+			if (sendCount >= 10000)
 			{
 				cout << "Done sending, now waiting for recieve." << endl;
+				endRequests = duration_cast< milliseconds >(
+					system_clock::now().time_since_epoch()
+					);
 			}
 		}
 
 		//Receive a reply from the server
-		if (recieveCount < 10000*146 - 1)
+		if (recieveCount < 10000-3)
 		{
 			//if ((recv_size = recv(s, server_reply, 2000, 0)) == SOCKET_ERROR)
 			//{
@@ -499,23 +522,94 @@ int client()
 			//{
 			//}
 			//else
-			if ((recv_size = recv(s, server_reply, 2000, 0)) > 0)
+
+
+			//if ((recv_size = recv(s, server_reply, 2000, 0)) > 0)
+			//{
+			//	//puts("Reply received\n");
+			//	//Add a NULL terminating chara//cter to make it a proper string before printing
+			//	server_reply[recv_size] = '\0';
+
+			//Receive a reply from the server
+			if ((recv_size = recv(s, server_reply, 2000, 0)) == SOCKET_ERROR)
+			{//bad read for whatever reason
+				//puts("recv failed");
+			}
+			else if (recv_size == 0)
+			{// empty read 
+			}
+			else
 			{
-				//puts("Reply received\n");
-				//Add a NULL terminating chara//cter to make it a proper string before printing
+				if (recieveCount == 0)
+				{
+					beginResponses = duration_cast< milliseconds >(
+						system_clock::now().time_since_epoch()
+						);
+				}
+
 				server_reply[recv_size] = '\0';
-				//puts(server_reply + 2);
-				recieveCount += recv_size;
+				int thisRecieveCount = 0;
+				//puts("Reply received\n");
+				thisRecieveCount = processReadData(server_reply, recv_size);
+				recieveCount += thisRecieveCount;
+
 				if ((recieveCount % 100) == 0)
 				{
 					cout << "recieveCount=" << recieveCount << endl;
 				}
-			}
+				/*
+				std::list<Message>::iterator iterator = MessageQueue.end();
+				//std::list<Message>::iterator oldEnd = MessageQueue.end();
+				for (int i = 0; i < thisRecieveCount; i++)//move the iterator back to where the just recieved Messages are kept
+				{
+					--iterator;
+				}
 
+				int loopI = 0;
+				while (loopI < thisRecieveCount)
+				{
+					//get a copy of the message that was recieved
+					Message localMessage(*iterator);
+
+					localMessage.setMSTimeStamp(localMessage.getCurrentMSTimeString(startTime));
+					localMessage.setMessageType("RSP");
+					//returnMessage.setOutgoingPort(local_port);
+					//returnMessage.setSocketNum(newsockfd);
+					//localMessage.setScenarioNum('1');
+
+					//int writeSize = 0;
+					//localMessage.formRequestMessage(); //ensure the message is built and ready to send
+					//char* msgPtr = localMessage.getRequestMessage();
+					//for (writeSize = 2; writeSize < 146 & msgPtr[writeSize] != 0; writeSize++)
+					//{
+
+					//}
+
+					//send(new_socket, msgPtr, writeSize, 0);
+
+					MessageQueue.push_back(localMessage);
+
+					//				//For Debug, this is put here. For real operations, put it at the end of the program.
+					//				for (Message cur : MessageQueue) //write all the messages to file
+					//				{
+					//					cur.writeToLogFile();
+					//					//MessageQueue.remove(cur);
+					//					//MessageQueue.pop_front(); // remove the message so it won't be printed again
+					//				}
+
+
+					iterator++;
+					loopI++;
+					
+				}*/
+			}
 		}
 		else
 		{
 			doneReading = true;
+			endResponses = duration_cast< milliseconds >(
+				system_clock::now().time_since_epoch()
+				);
 		}
 
 		int loop = 0;
@@ -634,7 +728,7 @@ int server()
 				localMessage.setMessageType("RSP");
 				//returnMessage.setOutgoingPort(local_port);
 				//returnMessage.setSocketNum(newsockfd);
-				localMessage.setScenarioNum('1');
+				localMessage.setScenarioNum('2');
 
 				int writeSize = 0;
 				localMessage.formRequestMessage(); //ensure the message is built and ready to send
@@ -686,8 +780,8 @@ int main(int argc, char *argv[])
 
 
 			//testProcessReadData();
-			server();
-			//client();
+			//server();
+			client();
 			// ...
 		}
 		catch (...) {
@@ -703,6 +797,7 @@ int main(int argc, char *argv[])
 		//MessageQueue.pop_front(); // remove the message so it won't be printed again
 		//logFile << "Test" << endl;
 	}
+	writeLogTrailer();
 	logFile.close();
 
 	return 0;
