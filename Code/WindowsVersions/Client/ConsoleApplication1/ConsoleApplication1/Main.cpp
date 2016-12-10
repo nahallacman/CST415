@@ -70,6 +70,24 @@ int lastCount;
 
 using namespace std;
 
+void writeLogTrailer()
+{
+
+
+	logFile << "Requests transmitted = [10000]" << endl;
+	logFile << "Responses received = [10000]" << endl;
+	logFile << "Req.run duration(ms) = [xxxxxxxxx]" << endl;
+	logFile << "Rsp.Run duration(ms) = [xxxxxxxxx]" << endl;
+	logFile << "Trans.Duration(ms) = [xxxxxxxxx]" << endl;
+	logFile << "Actual req.pace(ms) = [xxxx]" << endl;
+	logFile << "Actual rsp.Pace(ms) = [xxxx]" << endl;
+	logFile << "Configured pace(ms) = [0000]" << endl;
+	logFile << "Transaction avg. (ms) = [xxxx]" << endl;
+	logFile << "Your name : Cal" << endl;
+	logFile << "Name of student whose client was used : Cal" << endl;
+
+}
+
 void error(const char *msg)
 {
 	perror(msg);
@@ -93,7 +111,7 @@ int buildTokensIntoString()
 		index++;
 	}
 
-	cout << messageBuffer[0] << messageBuffer+1 << endl;
+	//cout << messageBuffer[0] << messageBuffer+1 << endl;
 
 	Message localMessage(&logFile);
 	// --- Take buffer and convert into a Message
@@ -184,7 +202,7 @@ int processReadData(char * inBuffer, int bytesRead)
 			int strLen = strlen(strPtrArray[strArrayIndex - 1]);
 			strncpy(temp, strPtrArray[strArrayIndex - 1], 20);
 			int i, j;
-			for (i = 0, j = strLen; (i < 20) & (inBuffer[i] != '|') & (inBuffer[i] != '\0'); ++i, ++j)
+			for (i = 0, j = strLen; (j < 20) & (inBuffer[i] != '|') & (inBuffer[i] != '\0'); ++i, ++j)
 			{
 				temp[j] = inBuffer[i];
 			}
@@ -568,6 +586,19 @@ int server()
 
 	puts("Connection accepted");
 
+	// make the recieve non-blocking
+	bool blocking = false;
+
+	unsigned long mode = blocking ? 0 : 1;
+	if ((ioctlsocket(new_socket, FIONBIO, &mode) == 0) ? true : false)
+	{
+		//no errors
+	}
+	else {//errors
+		cout << "Error putting socket into non-blocking mode." << endl;
+	}
+
+
 	int recieveCount = 0;
 	while (recieveCount < 10000)
 	{
@@ -655,8 +686,8 @@ int main(int argc, char *argv[])
 
 
 			//testProcessReadData();
-			//server();
-			client();
+			server();
+			//client();
 			// ...
 		}
 		catch (...) {
