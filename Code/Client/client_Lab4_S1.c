@@ -156,6 +156,7 @@ int main(int argc, char *argv[])
 /*
 int main(int argc, char *argv[])
 {
+<<<<<<< HEAD
 	const int maxMessageSize = 146;
 	const int MaxNumberOfRuns = 10000;
 
@@ -177,6 +178,8 @@ int main(int argc, char *argv[])
 
 
 
+=======
+>>>>>>> parent of 119a5f1... The actual traffic is correct, my interpretation of the traffic is incorrect on the client end.
 
 	//char Times[100][10];
 
@@ -301,7 +304,7 @@ int main(int argc, char *argv[])
 	//{
 	while(!doneSending)
 	{
-		if(sendCount < MaxNumberOfRuns)
+		if(sendCount < 5000)
 		{
 			printf("sending message iteration #: %d\n", sendCount+1); // TODO: remove this printing to improve performance
 			if(sendCount == 25 | sendCount == 75)
@@ -336,7 +339,7 @@ int main(int argc, char *argv[])
 			sendCount++;
 		}
 	
-		if(recieveCount < MaxNumberOfRuns + 1)
+		if(recieveCount < 5001)
 		{
 			//TODO: recieving only works on individual messages currently, needs to be able to read in multiple messages to the buffer on a single read.
 			// --- receive ---
@@ -351,11 +354,66 @@ int main(int argc, char *argv[])
 				//recieveCount += processReadData(bytesRead+unfinishedReadIndex, bufferSize-unfinishedReadIndex, maxMessageSize-unfinishedReadIndex,  inBuffer+endOfLastMessage, unfinishedReadIndex, endOfLastMessage);
 				//TODO: do I need to loop here?
 			}
+<<<<<<< HEAD
 
 			if(recieveCount != lastRecieveCount)
 			{
 				cout << "Recieved response #" << recieveCount << "." << endl;
 				lastRecieveCount = recieveCount;
+=======
+			else
+			{
+				bool reading = true;
+				int endOfLastMessage = 0;
+				int readIndex = 0;
+				char tempBuf[147];
+				int numSeparators = 0;
+				//TODO: Interpret the read as separate messages
+				//13 '|' per message
+				while(reading)
+				{
+					if(inBuffer[readIndex] == '|')
+					{
+						numSeparators++;
+						if(numSeparators > 12)
+						{
+							numSeparators = 0;
+							//finished with a message from endOfLastMessage to readIndex
+							for(int i = endOfLastMessage; i < readIndex+1; i++)
+							{
+								tempBuf[i - endOfLastMessage] = inBuffer[i];
+							}
+							endOfLastMessage = readIndex;//+2;
+
+							// --- Take buffer and convert into a Message
+							returnMessage.buildFromReturnString(tempBuf, '1');
+							
+							// --- write returned message to log
+							returnMessage.writeToLogFile();
+
+							//TODO: remove debug printing
+							//fwrite(returnMessage.getRequestMessage(), sizeof(char), (returnMessage.getRequestMessage()[1] < 255) ? returnMessage.getRequestMessage()[1] : 255 , stdout); //a bit sketchy but at least it has a max size check. If the target size is less than 255 there could be issues.
+							//cout << endl;
+
+							recieveCount++;
+							cout << "Recieved response #" << recieveCount << "." << endl;
+						}
+					}
+
+					readIndex++;
+					if(readIndex >= bytesRead)
+					{
+						reading = false; // we have reached the end of the file that has been read.
+					}
+				}
+
+				
+
+
+
+				// --- clear buffer just in case ----
+		    		bzero(inBuffer,1024);
+>>>>>>> parent of 119a5f1... The actual traffic is correct, my interpretation of the traffic is incorrect on the client end.
 			}
 		} // end if(recieveCount < 101)
 
@@ -368,7 +426,7 @@ int main(int argc, char *argv[])
 		//delay(50 milliseconds)
 		//usleep(50000);
 		//better way to do this in C++ '11
-		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(2));
 		//std::this_thread::sleep_for(std::chrono::microseconds(10));
 	} // end WHILE
 
